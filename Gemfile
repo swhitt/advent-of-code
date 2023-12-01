@@ -3,4 +3,8 @@
 source "https://rubygems.org"
 ruby file: ".ruby-version"
 gem "pry"
-gem "rubocop", require: false
+
+group :development do
+  gem "overcommit", require: false
+  gem "rubocop", require: false
+end
