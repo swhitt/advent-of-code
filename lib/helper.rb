@@ -30,7 +30,8 @@ module AoC
 
       def start_time(day, year = Time.now.year)
         tz = TZInfo::Timezone.get("America/New_York")
-        tz.to_local(Time.new(year, 12, day))
+        ny_midnight = Time.new(year, 12, day, 0, 0, 0, tz.current_period.offset.utc_total_offset)
+        ny_midnight.getutc
       end
 
       def wait_until_available(day, year = Time.now.year)
