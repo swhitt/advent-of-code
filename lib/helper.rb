@@ -36,18 +36,23 @@ module AoC
         current_time = Time.now
         aoc_start_time = start_time(day, year)
 
-        if current_time <= aoc_start_time
-          wait_seconds = aoc_start_time - current_time + 1
-          wait_days = (wait_seconds / (24 * 60 * 60)).to_i
-          wait_hours = ((wait_seconds % (24 * 60 * 60)) / (60 * 60)).to_i
-          wait_minutes = ((wait_seconds % (60 * 60)) / 60).to_i
-          wait_seconds = (wait_seconds % 60).to_i
-
-          announcement = "Day #{day}, year #{year} is not available yet. Waiting #{wait_days} days, #{wait_hours} " \
-                         "hours, #{wait_minutes} minutes, and #{wait_seconds} seconds until it becomes available..."
-          puts announcement
-          sleep(wait_seconds + (wait_minutes * 60) + (wait_hours * 3600) + (wait_days * 86400))
+        if current_time < aoc_start_time
+          puts "Day #{day}, year #{year} is not available yet. Waiting for it to become available..."
+          while current_time < aoc_start_time
+            sleep 1
+            current_time = Time.now
+            print_wait_time(aoc_start_time - current_time, day, year)
+          end
+          puts "\nDay #{day}, year #{year} is now available!"
+        else
+          puts "Day #{day}, year #{year} is already available."
         end
+      end
+
+      def print_wait_time(seconds, day, year)
+        wait_time = Time.at(seconds).utc.strftime("%-dd %-Hh %-Mm %-Ss")
+        print "\rDay #{day}, year #{year} will be available in #{wait_time}..."
+        $stdout.flush
       end
 
       private
