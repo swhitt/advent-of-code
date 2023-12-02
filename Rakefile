@@ -11,7 +11,7 @@ namespace :aoc do
     year = args[:year] || Time.now.year
     day_str = day.to_s.rjust(2, "0")
     year_str = year.to_s.rjust(4, "0")
-    dir_path = File.join("days", year_str, "day#{day_str}")
+    dir_path = File.join(year_str, day_str)
 
     if File.directory?(dir_path)
       puts "Directory already exists: #{dir_path}"

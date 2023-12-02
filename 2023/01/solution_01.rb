@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../../../lib/base"
+require_relative "../../lib/base"
 
 class Solution01 < Base
   NUMBER_WORDS_TO_DIGITS = {

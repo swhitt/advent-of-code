@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../../../lib/base"
+require_relative "../../lib/base"
 
 class Solution02 < Base
   def part_1
