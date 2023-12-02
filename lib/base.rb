@@ -1,8 +1,6 @@
-# frozen_string_literal: true
-
-require_relative "helper"
 require "bundler/setup"
 require "pry"
+require_relative "helper"
 
 module AoC
   module Year2022

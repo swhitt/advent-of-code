@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require "erb"
 require_relative "lib/helper"
 require "fileutils"

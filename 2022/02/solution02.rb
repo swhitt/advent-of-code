@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 require_relative "../../lib/base"
 
 class AoC::Year2022::Solution02 < Base
