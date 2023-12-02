@@ -2,7 +2,7 @@
 
 require_relative "../../lib/base"
 
-class Solution01 < Base
+class AoC::Year2023::Solution01 < Base
   NUMBER_WORDS_TO_DIGITS = {
     "zero" => "0", "one" => "1", "two" => "2", "three" => "3", "four" => "4",
     "five" => "5", "six" => "6", "seven" => "7", "eight" => "8", "nine" => "9"
@@ -37,7 +37,7 @@ class Solution01 < Base
 end
 
 if __FILE__ == $PROGRAM_NAME
-  solution = Solution01.new
+  solution = AoC::Year2023::Solution01.new
   # rubocop:disable Lint/Debugger
   binding.pry
   # rubocop:enable Lint/Debugger

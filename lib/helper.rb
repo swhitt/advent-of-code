@@ -13,7 +13,7 @@ module AoC
       attr_reader :input_file_paths
 
       def input_file_path(day, year = Time.now.year)
-        @input_file_paths[day] ||= File.join(__dir__, "..", "days", year.to_s, "day#{day.to_s.rjust(2, '0')}", "input.txt")
+        @input_file_paths[day] ||= File.join(__dir__, "..", "days", year.to_s, "day#{day.to_s.rjust(2, "0")}", "input.txt")
       end
 
       def get_or_load_input(day, year = Time.now.year)
@@ -38,8 +38,8 @@ module AoC
         current_time = Time.now
         aoc_start_time = start_time(day, year)
 
-        if current_time < aoc_start_time
-          wait_seconds = aoc_start_time - current_time
+        if current_time <= aoc_start_time
+          wait_seconds = aoc_start_time - current_time + 1
           wait_days = (wait_seconds / (24 * 60 * 60)).to_i
           wait_hours = ((wait_seconds % (24 * 60 * 60)) / (60 * 60)).to_i
           wait_minutes = ((wait_seconds % (60 * 60)) / 60).to_i
@@ -77,7 +77,7 @@ module AoC
             nil
           end
         rescue SocketError, Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,
-               Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
+          Net::HTTPBadResponse, Net::HTTPHeaderSyntaxError, Net::ProtocolError => e
           puts "A network error occurred while downloading the input: #{e.message}"
           nil
         end

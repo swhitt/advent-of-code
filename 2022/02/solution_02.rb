@@ -2,11 +2,11 @@
 
 require_relative "../../lib/base"
 
-class Solution02 < Base
+class AoC::Year2022::Solution02 < Base
   def part_1
-    score_map = { "X" => 1, "Y" => 2, "Z" => 3 }
-    win_conditions = { ["A", "Y"] => true, ["B", "Z"] => true, ["C", "X"] => true }
-    draw_conditions = { ["A", "X"] => true, ["B", "Y"] => true, ["C", "Z"] => true }
+    score_map = {"X" => 1, "Y" => 2, "Z" => 3}
+    win_conditions = {["A", "Y"] => true, ["B", "Z"] => true, ["C", "X"] => true}
+    draw_conditions = {["A", "X"] => true, ["B", "Y"] => true, ["C", "Z"] => true}
 
     input.each_line.sum do |line|
       opponent_choice, our_choice = line.split
@@ -32,10 +32,10 @@ class Solution02 < Base
       ["B", "Z"] => "C",
       ["C", "X"] => "B",
       ["C", "Y"] => "C",
-      ["C", "Z"] => "A",
+      ["C", "Z"] => "A"
     }
 
-    score_map = { "A" => 1, "B" => 2, "C" => 3 }
+    score_map = {"A" => 1, "B" => 2, "C" => 3}
 
     input_lines.sum do |line|
       opponent_choice, desired_outcome = line.split
@@ -55,7 +55,7 @@ class Solution02 < Base
 end
 
 if __FILE__ == $PROGRAM_NAME
-  solution = Solution02.new
+  solution = AoC::Year2022::Solution02.new
   # rubocop:disable Lint/Debugger
   binding.pry
   # rubocop:enable Lint/Debugger

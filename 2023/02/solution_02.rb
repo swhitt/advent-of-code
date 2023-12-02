@@ -2,8 +2,8 @@
 
 require_relative "../../lib/base"
 
-class Solution02 < Base
-  MAX_CUBES = { red: 12, green: 13, blue: 14 }.freeze
+class AoC::Year2023::Solution02 < Base
+  MAX_CUBES = {red: 12, green: 13, blue: 14}.freeze
 
   def part_1
     parsed_games.sum do |game_id, handfuls|
@@ -15,7 +15,7 @@ class Solution02 < Base
 
   def part_2
     parsed_games.sum do |_game_id, handfuls|
-      handfuls.each_with_object({ r: 0, g: 0, b: 0 }) do |handful, min_cubes|
+      handfuls.each_with_object({r: 0, g: 0, b: 0}) do |handful, min_cubes|
         min_cubes[:r] = [min_cubes[:r], handful[:red]].max
         min_cubes[:g] = [min_cubes[:g], handful[:green]].max
         min_cubes[:b] = [min_cubes[:b], handful[:blue]].max
@@ -33,14 +33,14 @@ class Solution02 < Base
             count, color = color_count.split
             cubes[color.to_sym] += count.to_i
           end
-        end,
+        end
       ]
     end
   end
 end
 
 if __FILE__ == $PROGRAM_NAME
-  solution = Solution02.new
+  solution = AoC::Year2023::Solution02.new
   puts "Part 1: #{solution.part_1}"
   puts "Part 2: #{solution.part_2}"
   # rubocop:disable Lint/Debugger

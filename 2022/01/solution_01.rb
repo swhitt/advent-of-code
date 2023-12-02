@@ -2,7 +2,7 @@
 
 require_relative "../../lib/base"
 
-class Solution01 < Base
+class AoC::Year2022::Solution01 < Base
   def part_1
     elf_inventories = input.split("\n\n")
     elf_inventories.map do |inventory|
@@ -21,7 +21,7 @@ class Solution01 < Base
 end
 
 if __FILE__ == $PROGRAM_NAME
-  solution = Solution01.new
+  solution = AoC::Year2022::Solution01.new
   # rubocop:disable Lint/Debugger
   binding.pry
   # rubocop:enable Lint/Debugger

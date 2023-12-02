@@ -2,7 +2,7 @@
 
 require_relative "../../lib/base"
 
-class Solution<%= day.to_s.rjust(2, '0') %> < Base
+class AoC::Year<%= year%>::Solution<%= day.to_s.rjust(2, '0') %> < Base
   def part_1
     # do it first
   end
@@ -13,7 +13,7 @@ class Solution<%= day.to_s.rjust(2, '0') %> < Base
 end
 
 if __FILE__ == $PROGRAM_NAME
-  solution = Solution<%= day.to_s.rjust(2, '0') %>.new
+  solution = AoC::Year<%= year%>::Solution<%= day.to_s.rjust(2, '0') %>.new
   # rubocop:disable Lint/Debugger
   binding.pry
   # rubocop:enable Lint/Debugger

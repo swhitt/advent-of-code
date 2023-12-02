@@ -4,6 +4,14 @@ require_relative "helper"
 require "bundler/setup"
 require "pry"
 
+module AoC
+  module Year2022
+  end
+
+  module Year2023
+  end
+end
+
 class Base
   @solution_path = nil
 
@@ -11,7 +19,7 @@ class Base
     attr_accessor :solution_path
 
     def inherited(subclass)
-      subclass.solution_path = File.dirname(caller_locations.first.absolute_path)
+      subclass.solution_path = File.dirname(caller_locations(1..1).first.absolute_path)
       super
     end
   end
@@ -27,7 +35,7 @@ class Base
     rescue Errno::ENOENT
       warn "Input file not found: #{input_path}"
       @input = []
-    rescue StandardError => e
+    rescue => e
       warn "Error reading input file: #{e.message}"
       @input = []
     end

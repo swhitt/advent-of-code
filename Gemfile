@@ -5,5 +5,5 @@ ruby file: ".ruby-version"
 gem "pry"
 
 group :development do
-  gem "rubocop", require: false
+  gem "standard"
 end
