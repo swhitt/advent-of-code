@@ -8,14 +8,14 @@ class AoC::Year2023::Solution01 < Base
     "five" => "5", "six" => "6", "seven" => "7", "eight" => "8", "nine" => "9"
   }.freeze
 
-  def part_1
+  def part1
     input_lines.map do |line|
       first_digit, last_digit = line.scan(/\d/).values_at(0, -1)
       "#{first_digit}#{last_digit}".to_i
     end.sum
   end
 
-  def part_2
+  def part2
     input_lines.map do |line|
       nums = extract_numbers(line)
       first_digit, last_digit = nums.values_at(0, -1)
@@ -38,7 +38,5 @@ end
 
 if __FILE__ == $PROGRAM_NAME
   solution = AoC::Year2023::Solution01.new
-  # rubocop:disable Lint/Debugger
-  binding.pry
-  # rubocop:enable Lint/Debugger
+  solution.run
 end

@@ -2,7 +2,7 @@
 
 require_relative "../../lib/base"
 
-class AoC::Year<%= year%>::Solution<%= day.to_s.rjust(2, '0') %> < Base
+class AoC::Year2023::Solution03 < Base
   def part1
     # do it first
   end
@@ -13,6 +13,6 @@ class AoC::Year<%= year%>::Solution<%= day.to_s.rjust(2, '0') %> < Base
 end
 
 if __FILE__ == $PROGRAM_NAME
-  solution = AoC::Year<%= year%>::Solution<%= day.to_s.rjust(2, '0') %>.new
+  solution = AoC::Year2023::Solution03.new
   solution.run
 end

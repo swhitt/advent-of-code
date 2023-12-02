@@ -3,14 +3,14 @@
 require_relative "../../lib/base"
 
 class AoC::Year2022::Solution01 < Base
-  def part_1
+  def part1
     elf_inventories = input.split("\n\n")
     elf_inventories.map do |inventory|
       inventory.split.map(&:to_i).sum
     end.max
   end
 
-  def part_2
+  def part2
     elf_inventories = input.split("\n\n")
     calorie_totals = elf_inventories.map do |inventory|
       inventory.split.map(&:to_i).sum
@@ -22,7 +22,5 @@ end
 
 if __FILE__ == $PROGRAM_NAME
   solution = AoC::Year2022::Solution01.new
-  # rubocop:disable Lint/Debugger
-  binding.pry
-  # rubocop:enable Lint/Debugger
+  solution.run
 end

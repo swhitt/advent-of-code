@@ -5,7 +5,7 @@ require_relative "../../lib/base"
 class AoC::Year2023::Solution02 < Base
   MAX_CUBES = {red: 12, green: 13, blue: 14}.freeze
 
-  def part_1
+  def part1
     parsed_games.sum do |game_id, handfuls|
       next 0 unless handfuls.all? { |handful| handful.all? { |color, count| count <= MAX_CUBES[color] } }
 
@@ -13,7 +13,7 @@ class AoC::Year2023::Solution02 < Base
     end
   end
 
-  def part_2
+  def part2
     parsed_games.sum do |_game_id, handfuls|
       handfuls.each_with_object({r: 0, g: 0, b: 0}) do |handful, min_cubes|
         min_cubes[:r] = [min_cubes[:r], handful[:red]].max
@@ -41,9 +41,5 @@ end
 
 if __FILE__ == $PROGRAM_NAME
   solution = AoC::Year2023::Solution02.new
-  puts "Part 1: #{solution.part_1}"
-  puts "Part 2: #{solution.part_2}"
-  # rubocop:disable Lint/Debugger
-  binding.pry
-  # rubocop:enable Lint/Debugger
+  solution.run
 end

@@ -41,7 +41,30 @@ class Base
     end
   end
 
+  def part1(input)
+    raise NotImplementedError, "Please implement part1"
+  end
+
+  def part2(input)
+    raise NotImplementedError, "Please implement part2"
+  end
+
   def input_lines
     input.split("\n")
+  end
+
+  def run(debug = true)
+    execute_and_rescue(:part1)
+    execute_and_rescue(:part2)
+
+    binding.pry if debug # rubocop:disable Lint/Debugger
+  end
+
+  private
+
+  def execute_and_rescue(method_name)
+    puts "#{method_name.to_s.capitalize}: #{send(method_name)}"
+  rescue Exception => e # rubocop:disable Lint/RescueException
+    puts "#{method_name.to_s.capitalize}: #{e.class} - #{e.message}"
   end
 end

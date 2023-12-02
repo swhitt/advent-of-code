@@ -3,7 +3,7 @@
 require_relative "../../lib/base"
 
 class AoC::Year2022::Solution02 < Base
-  def part_1
+  def part1
     score_map = {"X" => 1, "Y" => 2, "Z" => 3}
     win_conditions = {["A", "Y"] => true, ["B", "Z"] => true, ["C", "X"] => true}
     draw_conditions = {["A", "X"] => true, ["B", "Y"] => true, ["C", "Z"] => true}
@@ -22,7 +22,7 @@ class AoC::Year2022::Solution02 < Base
     end
   end
 
-  def part_2
+  def part2
     desired_outcome_to_move = {
       ["A", "X"] => "C",
       ["A", "Y"] => "A",
@@ -56,7 +56,5 @@ end
 
 if __FILE__ == $PROGRAM_NAME
   solution = AoC::Year2022::Solution02.new
-  # rubocop:disable Lint/Debugger
-  binding.pry
-  # rubocop:enable Lint/Debugger
+  solution.run
 end
