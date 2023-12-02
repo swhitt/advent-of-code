@@ -20,8 +20,10 @@ class Base
 
   def initialize(input_filename = "input.txt")
     input_path = File.join(self.class.solution_path, input_filename)
+
+    puts "Loading input from #{input_path}"
     begin
-      @input = File.readlines(input_path).map(&:chomp)
+      @input = File.read(input_path)
     rescue Errno::ENOENT
       warn "Input file not found: #{input_path}"
       @input = []
@@ -29,5 +31,9 @@ class Base
       warn "Error reading input file: #{e.message}"
       @input = []
     end
+  end
+
+  def input_lines
+    input.split("\n")
   end
 end

@@ -1,15 +1,17 @@
 # frozen_string_literal: true
 
 require "erb"
-require_relative "lib/aoc/helper"
+require_relative "lib/helper"
 require "fileutils"
 
 namespace :aoc do
-  desc "Set up the directory and solution file for a given day"
-  task :setup, [:day] do |_t, args|
+  desc "Set up the directory and solution file for a given day and year"
+  task :setup, [:day, :year] do |_t, args|
     day = args[:day].to_i
+    year = args[:year] || Time.now.year
     day_str = day.to_s.rjust(2, "0")
-    dir_path = File.join("days", "day#{day_str}")
+    year_str = year.to_s.rjust(4, "0")
+    dir_path = File.join("days", year_str, "day#{day_str}")
 
     if File.directory?(dir_path)
       puts "Directory already exists: #{dir_path}"
@@ -18,11 +20,10 @@ namespace :aoc do
       puts "Created directory: #{dir_path}"
     end
 
-    # Only download input if it's past the start time
-    if AoC::Helper.start_time(day) < Time.now
-      AoC::Helper.get_or_load_input(day)
+    if AoC::Helper.start_time(day, year) < Time.now
+      AoC::Helper.get_or_load_input(day, year)
     else
-      puts "It's not yet time to download the input for day #{day}."
+      puts "It's not yet time to download the input for day #{day}, year #{year}."
     end
 
     # Generate the solution file from the template

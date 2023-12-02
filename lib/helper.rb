@@ -6,53 +6,51 @@ require "tzinfo"
 
 module AoC
   module Helper
-    AOC_YEAR = 2023
-    AOC_URL = "https://adventofcode.com/#{AOC_YEAR}/day/%d/input".freeze
     SESSION_COOKIE = ENV.fetch("AOC_SESSION_COOKIE", nil)
     @input_file_paths = {}
 
     class << self
       attr_reader :input_file_paths
 
-      def input_file_path(day)
-        @input_file_paths[day] ||= File.join(__dir__, "..", "days", "day#{day.to_s.rjust(2, '0')}", "input.txt")
+      def input_file_path(day, year = Time.now.year)
+        @input_file_paths[day] ||= File.join(__dir__, "..", "days", year.to_s, "day#{day.to_s.rjust(2, '0')}", "input.txt")
       end
 
-      def get_or_load_input(day)
-        wait_until_available(day)
-        path = input_file_path(day)
+      def get_or_load_input(day, year = Time.now.year)
+        wait_until_available(day, year)
+        path = input_file_path(day, year)
 
         if File.exist?(path)
-          puts "Input for day #{day} already exists. Loading from disk."
+          puts "Input for day #{day}, year #{year} already exists. Loading from disk."
           File.readlines(path)
         else
-          download_and_save_input(day)
+          download_and_save_input(day, year)
         end
       end
 
-      def start_time(day)
+      def start_time(day, year = Time.now.year)
         tz = TZInfo::Timezone.get("America/New_York")
-        tz.to_local(Time.new(AOC_YEAR, 12, day))
+        tz.to_local(Time.new(year, 12, day))
       end
 
-      def wait_until_available(day)
+      def wait_until_available(day, year = Time.now.year)
         current_time = Time.now
-        aoc_start_time = start_time(day)
+        aoc_start_time = start_time(day, year)
 
         if current_time < aoc_start_time
           wait_seconds = aoc_start_time - current_time
-          puts "Day #{day} is not available yet. Waiting #{wait_seconds} seconds until it becomes available..."
+          puts "Day #{day}, year #{year} is not available yet. Waiting #{wait_seconds} seconds until it becomes available..."
           sleep(wait_seconds)
         end
       end
 
       private
 
-      def download_and_save_input(day)
-        path = input_file_path(day)
+      def download_and_save_input(day, year = Time.now.year)
+        path = input_file_path(day, year)
         FileUtils.mkdir_p(File.dirname(path))
 
-        url = URI(AOC_URL % day)
+        url = "https://adventofcode.com/#{year}/#{day}/%d/input".freeze
         request = Net::HTTP::Get.new(url)
         request["Cookie"] = "session=#{SESSION_COOKIE}"
 
@@ -64,10 +62,10 @@ module AoC
           case response
           when Net::HTTPSuccess
             File.write(path, response.body)
-            puts "Day #{day} input downloaded and saved successfully."
+            puts "Day #{day}, year #{year} input downloaded and saved successfully."
             response.body.lines
           else
-            puts "Failed to download input for day #{day}. HTTP Status: #{response.code}"
+            puts "Failed to download input for day #{day}, year #{year}. HTTP Status: #{response.code}"
             nil
           end
         rescue SocketError, Timeout::Error, Errno::EINVAL, Errno::ECONNRESET, EOFError,

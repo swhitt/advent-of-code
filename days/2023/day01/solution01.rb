@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative "../../lib/base"
+require_relative "../../../lib/base"
 
 class Solution01 < Base
   NUMBER_WORDS_TO_DIGITS = {
@@ -8,15 +8,15 @@ class Solution01 < Base
     "five" => "5", "six" => "6", "seven" => "7", "eight" => "8", "nine" => "9"
   }.freeze
 
-  def solve_part_1
-    input.map do |line|
+  def part_1
+    input_lines.map do |line|
       first_digit, last_digit = line.scan(/\d/).values_at(0, -1)
       "#{first_digit}#{last_digit}".to_i
     end.sum
   end
 
-  def solve_part_2
-    input.map do |line|
+  def part_2
+    input_lines.map do |line|
       nums = extract_numbers(line)
       first_digit, last_digit = nums.values_at(0, -1)
       "#{first_digit}#{last_digit}".to_i
