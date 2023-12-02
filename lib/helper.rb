@@ -39,8 +39,15 @@ module AoC
 
         if current_time < aoc_start_time
           wait_seconds = aoc_start_time - current_time
-          puts "Day #{day}, year #{year} is not available yet. Waiting #{wait_seconds} seconds until it becomes available..."
-          sleep(wait_seconds)
+          wait_days = (wait_seconds / (24 * 60 * 60)).to_i
+          wait_hours = ((wait_seconds % (24 * 60 * 60)) / (60 * 60)).to_i
+          wait_minutes = ((wait_seconds % (60 * 60)) / 60).to_i
+          wait_seconds = (wait_seconds % 60).to_i
+
+          announcement = "Day #{day}, year #{year} is not available yet. Waiting #{wait_days} days, #{wait_hours} " \
+                         "hours, #{wait_minutes} minutes, and #{wait_seconds} seconds until it becomes available..."
+          puts announcement
+          sleep(wait_seconds + (wait_minutes * 60) + (wait_hours * 3600) + (wait_days * 86400))
         end
       end
 
