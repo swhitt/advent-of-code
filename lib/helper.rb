@@ -50,7 +50,7 @@ module AoC
         path = input_file_path(day, year)
         FileUtils.mkdir_p(File.dirname(path))
 
-        url = "https://adventofcode.com/#{year}/#{day}/%d/input".freeze
+        url = URI("https://adventofcode.com/#{year}/day/#{day}/input")
         request = Net::HTTP::Get.new(url)
         request["Cookie"] = "session=#{SESSION_COOKIE}"
 
