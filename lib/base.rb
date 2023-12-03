@@ -1,6 +1,6 @@
 require "bundler/setup"
 require "pry"
-require_relative "helper"
+require_relative "input_manager"
 
 module AoC
   module Year2022

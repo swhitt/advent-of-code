@@ -1,5 +1,5 @@
 require "erb"
-require_relative "lib/helper"
+require_relative "lib/input_manager"
 require "fileutils"
 
 namespace :aoc do
@@ -18,8 +18,8 @@ namespace :aoc do
       puts "Created directory: #{dir_path}"
     end
 
-    if AoC::Helper.start_time(day, year) < Time.now
-      AoC::Helper.get_or_load_input(day, year)
+    if AoC::InputManager.start_time(day, year) < Time.now
+      AoC::InputManager.get_or_load_input(day, year)
     else
       puts "It's not yet time to download the input for day #{day}, year #{year}."
     end

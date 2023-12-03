@@ -1,7 +1,7 @@
 require "pqueue"
 require "marshal"
 
-module AoCHelper
+module Util
   def chunk_array(array, chunk_size)
     array.each_slice(chunk_size).to_a
   end
