@@ -8,18 +8,27 @@ module AoC
     SESSION_COOKIE = ENV.fetch("AOC_SESSION_COOKIE", nil)
 
     class << self
-      def input_file_path(day, year = Time.now.year)
-        file_name = "day#{day.to_s.rjust(2, "0")}.txt"
-        File.join(__dir__, "..", "days", year.to_s, file_name)
-      end
-
-      def get_or_load_input(day, year = Time.now.year)
-        wait_until_available(day, year)
+      def input_for(day, year = Time.now.year)
         path = input_file_path(day, year)
 
-        return File.readlines(path) if File.exist?(path)
+        if File.exist?(path)
+          puts "Loaded saved input for day #{day}, year #{year}"
+          return File.readlines(path)
+        end
 
+        wait_until_available(day, year) if Time.now < start_time(day, year)
         download_and_save_input(day, year)
+      end
+
+      def input_file_path(day, year = Time.now.year)
+        day_str = day.to_s.rjust(2, "0")
+        File.join(__dir__, "..", year.to_s, day_str, "input.txt")
+      end
+
+      def start_time(day, year)
+        tz = TZInfo::Timezone.get("America/New_York")
+        ny_midnight = Time.new(year, 12, day, 0, 0, 0, tz.current_period.offset.utc_total_offset)
+        ny_midnight.getutc
       end
 
       def wait_until_available(day, year = Time.now.year)
@@ -31,14 +40,6 @@ module AoC
         puts "Day #{day}, year #{year} is now available!"
       end
 
-      private
-
-      def start_time(day, year)
-        tz = TZInfo::Timezone.get("America/New_York")
-        ny_midnight = Time.new(year, 12, day, 0, 0, 0, tz.current_period.offset.utc_total_offset)
-        ny_midnight.getutc
-      end
-
       def sleep_until(target_time)
         target_time += 1
         while Time.now < target_time
@@ -48,7 +49,7 @@ module AoC
         end
       end
 
-      def print_wait_time(seconds, day, year)
+      def print_wait_time(seconds, day, year = Time.now.year)
         days, remaining = seconds.divmod(24 * 60 * 60)
         hours, remaining = remaining.divmod(60 * 60)
         minutes, seconds = remaining.divmod(60)
@@ -68,9 +69,13 @@ module AoC
         path = input_file_path(day, year)
         FileUtils.mkdir_p(File.dirname(path))
         url = URI("https://adventofcode.com/#{year}/day/#{day}/input")
-
+        puts "Downloading input for day #{day}, year #{year}... (#{url})"
         response = fetch_input_from_url(url)
-        return unless response.is_a?(Net::HTTPSuccess)
+
+        unless response.is_a?(Net::HTTPSuccess)
+          puts "Error downloading input: #{response.message}"
+          return
+        end
 
         File.write(path, response.body)
         puts "Day #{day}, year #{year} input downloaded and saved."

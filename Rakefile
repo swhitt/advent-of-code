@@ -3,8 +3,8 @@ require_relative "lib/input_manager"
 require "fileutils"
 
 namespace :aoc do
-  desc "Set up the directory and solution file for a given day and year"
-  task :setup, [:day, :year] do |_t, args|
+  desc "Set up the directory and solution file for a given year and day"
+  task :setup, [:year, :day] do |_t, args|
     day = args[:day].to_i
     year = args[:year] || Time.now.year
     day_str = day.to_s.rjust(2, "0")
@@ -19,7 +19,7 @@ namespace :aoc do
     end
 
     if AoC::InputManager.start_time(day, year) < Time.now
-      AoC::InputManager.get_or_load_input(day, year)
+      AoC::InputManager.input_for(day, year)
     else
       puts "It's not yet time to download the input for day #{day}, year #{year}."
     end
