@@ -41,7 +41,7 @@ module AoC
       end
 
       def sleep_until(target_time)
-        target_time += 1
+        target_time += 2
         while Time.now < target_time
           sleep 1
           remaining_time = target_time - Time.now
