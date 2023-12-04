@@ -1,17 +1,15 @@
 require_relative "../../lib/base"
 
 class AoC::Year2023::Solution04 < Base
+  CARD_NUMBER_REGEX = /Card\s+(\d+)/
+
   def part1
-    input_lines.sum do |card_string|
-      _, before_numbers, after_numbers = parse_card_string(card_string)
-      matches = before_numbers & after_numbers
-      matches.empty? ? 0 : 2**(matches.size - 1)
-    end
+    input_lines.sum { |card_str| points(card_str) }
   end
 
   def part2
     card_copies = Hash.new(0)
-    parsed_cards = input_lines.map { |line| parse_card_string(line) }
+    parsed_cards = input_lines.map { |card_str| parse(card_str) }
 
     parsed_cards.each { |card_number, _, _| card_copies[card_number] = 1 }
 
@@ -27,14 +25,17 @@ class AoC::Year2023::Solution04 < Base
     card_copies.values.sum
   end
 
-  def parse_card_string(card_string)
-    card_number = card_string[/Card\s+(\d+):/, 1].to_i
-    before_pipe, after_pipe = card_string.split(":").last.split("|").map(&:strip)
+  def parse(card_str)
+    number = card_str[CARD_NUMBER_REGEX, 1].to_i
+    before, after = card_str.split(":").last.split("|").map(&:strip)
 
-    before_numbers = before_pipe.scan(/\d+/).map(&:to_i)
-    after_numbers = after_pipe.scan(/\d+/).map(&:to_i)
+    [number, before.scan(/\d+/).map(&:to_i), after.scan(/\d+/).map(&:to_i)]
+  end
 
-    [card_number, before_numbers, after_numbers]
+  def points(card_str)
+    _, before, after = parse(card_str)
+    matches = before & after
+    matches.empty? ? 0 : 2**(matches.size - 1)
   end
 end
 
