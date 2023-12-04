@@ -2,14 +2,33 @@ require_relative "../../lib/base"
 
 class AoC::Year2022::Solution05 < Base
   def part1
-    # do it first
+    crane do |from_stack, to_stack, count|
+      count.times do
+        box = from_stack.shift
+        to_stack.unshift(box)
+      end
+    end.values.map(&:first).join
   end
 
   def part2
-    # do it second
+    crane do |from_stack, to_stack, count|
+      boxes = from_stack.shift(count)
+      to_stack.unshift(*boxes)
+    end.values.map(&:first).join
   end
 
-  def stacks
+  def crane
+    stacks = initial_stacks
+    moves.each do |move|
+      from_stack = stacks[move[:from]]
+      to_stack = stacks[move[:to]]
+      count = move[:count]
+      yield(from_stack, to_stack, count) if block_given?
+    end
+    stacks
+  end
+
+  def initial_stacks
     lines = stack_definition.lines.map(&:chomp)
     chars = lines.map(&:chars).transpose
 
@@ -17,7 +36,7 @@ class AoC::Year2022::Solution05 < Base
       next if stack.none? { |c| c.match?(/\d+/) }
 
       key = stack.pop
-      hash[key] = stack.reject { |e| e == " " }
+      hash[key.to_i] = stack.reject { |e| e == " " }
     end
   end
 
