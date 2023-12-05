@@ -57,6 +57,13 @@ module Util
   def self.priority_queue(&block)
     PQueue.new(&block)
   end
+
+  def self.range_intersection(range1, range2)
+    new_min = [range1.min, range2.min].max
+    new_max = [range1.max, range2.max].min
+
+    (new_min <= new_max) ? (new_min..new_max) : nil
+  end
 end
 
 class Object

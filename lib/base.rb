@@ -1,5 +1,6 @@
 require "bundler/setup"
 require "pry"
+require "benchmark"
 require_relative "input_manager"
 require_relative "util"
 
@@ -53,8 +54,11 @@ class Base
   end
 
   def run(debug = true)
-    execute_and_rescue(:part1)
-    execute_and_rescue(:part2)
+    part1_time = Benchmark.realtime { execute_and_rescue(:part1) }
+    part2_time = Benchmark.realtime { execute_and_rescue(:part2) }
+
+    puts "\nPart1 time: #{part1_time}s"
+    puts "Part2 time: #{part2_time}s"
 
     binding.pry if debug # rubocop:disable Lint/Debugger
   end
