@@ -5,7 +5,7 @@ require "fileutils"
 
 module AoC
   module InputManager
-    SESSION_COOKIE = ENV.fetch("AOC_SESSION_COOKIE", nil)
+    SESSION_COOKIE = ENV.fetch("AOC_SESSION", nil)
 
     class << self
       def input_for(day, year = Time.now.year)

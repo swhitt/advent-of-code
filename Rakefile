@@ -18,11 +18,7 @@ namespace :aoc do
       puts "Created directory: #{dir_path}"
     end
 
-    if AoC::InputManager.start_time(day, year) < Time.now
-      AoC::InputManager.input_for(day, year)
-    else
-      puts "It's not yet time to download the input for day #{day}, year #{year}."
-    end
+    AoC::InputManager.input_for(day, year)
 
     # Generate the solution file from the template
     template_path = File.join("templates", "solution_template.rb.erb")
