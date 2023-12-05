@@ -18,18 +18,16 @@ namespace :aoc do
       puts "Created directory: #{dir_path}"
     end
 
-    AoC::InputManager.input_for(day, year)
-
-    # Generate the solution file from the template
-    template_path = File.join("templates", "solution_template.rb.erb")
     solution_path = File.join(dir_path, "solution#{day_str}.rb")
 
     if File.exist?(solution_path)
       puts "Solution file already exists: #{solution_path}"
     else
+      template_path = File.join("templates", "solution_template.rb.erb")
       template = ERB.new(File.read(template_path), trim_mode: "-")
       File.write(solution_path, template.result(binding))
       puts "Created solution file: #{solution_path}"
     end
+    AoC::InputManager.input_for(day, year)
   end
 end

@@ -1,8 +1,8 @@
 # Guardfile
 guard :shell do
-  watch(%r{2023/(\d{2})/solution(\d{2})\.rb}) do |m|
-    day = m[1] # Assuming the day's folder and the solution file have the same number
-    puts "Reloading solution for December #{day}, 2023..."
-    `ruby 2023/#{day}/solution#{day}.rb`
+  watch(%r{(\d{4})/(\d{2})/solution(\d{2})\.rb}) do |m|
+    year, day = m[1], m[2]
+    puts "Reloading solution for December #{day}, #{year}..."
+    `ruby #{year}/#{day}/solution#{day}.rb`
   end
 end
