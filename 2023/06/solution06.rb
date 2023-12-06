@@ -8,17 +8,13 @@ class AoC::Year2023::Solution06 < Base
 
   def part2
     input_time, input_distance = input_lines.map { |line| line.gsub(/[^\d]/, "").to_i }
-    calculate_ways_to_win_single_race(input_time, input_distance)
+    calculate_ways_to_win([[input_time, input_distance]])
   end
 
   private
 
   def calculate_ways_to_win(races)
     races.inject(1) { |product, (time, record)| product * calculate_ways(time, record) }
-  end
-
-  def calculate_ways_to_win_single_race(time, record_distance)
-    calculate_ways(time, record_distance)
   end
 
   def calculate_ways(time, record_distance)
