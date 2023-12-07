@@ -30,9 +30,15 @@ class Base
     end
   end
 
-  attr_reader :input
+  attr_accessor :input
 
-  def initialize(input_filename = "input.txt")
+  def initialize(input: nil, input_filename: "input.txt")
+    if input
+      puts "Loading input from argument!"
+      @input = input
+      return
+    end
+
     input_path = File.join(self.class.solution_path, input_filename)
 
     puts "Loading input from #{input_path}"

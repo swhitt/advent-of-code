@@ -1,0 +1,49 @@
+require_relative "../../../<%= year %>/<%= padded_day %>/solution<%= padded_day %>"
+
+RSpec.describe AoC::Year<%= year %>::Solution<%= padded_day %> do
+  let(:solution) { described_class.new }
+
+  let(:sample_input) do
+    # replace with actual sample data
+    <<~EXAMPLE1
+      32T3K 765
+      T55J5 684
+      KK677 28
+      KTJJT 220
+      QQQJA 483
+    EXAMPLE1
+  end
+
+  context "with sample input" do
+    let(:solution) { described_class.new(input: sample_input) }
+
+    describe "#part1" do
+      it "calculates the correct answer" do
+        expect(solution.part1).to eq("part1 answer")
+      end
+    end
+
+    describe "#part2" do
+      it "calculates the correct answer" do
+        pending("need to finish part1 first")
+        expect(solution.part2).to eq("part2 answer")
+      end
+    end
+  end
+
+  context "with real input" do
+    describe "#part1" do
+      it "calculates the correct answer" do
+        pending("need real part1 answer")
+        expect(solution.part1).to eq('real answer1')
+      end
+    end
+
+    describe "#part2" do
+      it "calculates the correct answer" do
+        pending("need real part2 answer")
+        expect(solution.part2).to eq('real answer2')
+      end
+    end
+  end
+end

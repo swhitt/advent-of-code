@@ -10,6 +10,7 @@ namespace :aoc do
     day_str = day.to_s.rjust(2, "0")
     year_str = year.to_s.rjust(4, "0")
     dir_path = File.join(year_str, day_str)
+    padded_day = day_str.rjust(2, "0")
 
     if File.directory?(dir_path)
       puts "Directory already exists: #{dir_path}"
@@ -27,6 +28,18 @@ namespace :aoc do
       template = ERB.new(File.read(template_path), trim_mode: "-")
       File.write(solution_path, template.result(binding))
       puts "Created solution file: #{solution_path}"
+    end
+
+    spec_dir = File.join("spec", dir_path)
+    spec_path = File.join(spec_dir, "solution#{day_str}_spec.rb")
+    if File.exist?(spec_path)
+      puts "Spec file already exists: #{spec}"
+    else
+      FileUtils.mkdir_p(spec_dir)
+      template_path = File.join("templates", "solution_spec.rb.erb")
+      template = ERB.new(File.read(template_path), trim_mode: "-")
+      File.write(spec_path, template.result(binding))
+      puts "Created spec file: #{spec_path}"
     end
     AoC::InputManager.input_for(day, year)
   end
