@@ -63,8 +63,8 @@ class Base
     part1_time = Benchmark.realtime { execute_and_rescue(:part1) }
     part2_time = Benchmark.realtime { execute_and_rescue(:part2) }
 
-    puts "\nPart1 time: #{part1_time}s"
-    puts "Part2 time: #{part2_time}s"
+    puts "\nPart1 time: #{format_duration(part1_time)}"
+    puts "Part2 time: #{format_duration(part2_time)}"
 
     binding.pry if debug # rubocop:disable Lint/Debugger
   end
@@ -73,7 +73,23 @@ class Base
 
   def execute_and_rescue(method_name)
     puts "#{method_name.to_s.capitalize}: #{send(method_name)}"
-  rescue Exception => e # rubocop:disable Lint/RescueException
-    puts "#{method_name.to_s.capitalize}: #{e.class} - #{e.message}"
+  rescue => e
+    puts "#{method_name.to_s.capitalize} failed: #{e.class} - #{e.message}"
+    puts "Backtrace:\n\t#{e.backtrace.join("\n\t")}"
+  end
+
+  def format_duration(seconds)
+    case seconds
+    when 0...5
+      milliseconds = seconds * 1000
+      if milliseconds < 1
+        microseconds = milliseconds * 1000
+        "#{microseconds.round(2)}μs"
+      else
+        "#{milliseconds.round(2)}ms"
+      end
+    else
+      Time.at(seconds).utc.strftime("%Hh %Mm %Ss")
+    end
   end
 end
