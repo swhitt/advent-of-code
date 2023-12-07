@@ -3,14 +3,15 @@ require_relative "../../lib/base"
 class AoC::Year2023::Solution05 < Base
   def part1
     # reworked to use the same map_ranges used by part 2
-    final_ranges(seeds.map { |x| [x, 1] }, maps).min_by(&:first).first
+    final_ranges(seeds.map { |x| [x, 1] }).min_by(&:first).first
   end
 
   def part2
-    final_ranges(seed_ranges, maps).min_by(&:first).first
+    final_ranges(seed_ranges).min_by(&:first).first
   end
 
-  def final_ranges(first_ranges, map_set)
+  def final_ranges(first_ranges, map_set = nil)
+    map_set = maps if map_set.nil?
     first_ranges.flat_map do |(start, length)|
       map_set.reduce([[start, length]]) do |ranges, rules|
         ranges.flat_map { |range| map_ranges(range, rules) }
@@ -19,11 +20,7 @@ class AoC::Year2023::Solution05 < Base
   end
 
   def maps
-    input_sections[1..].map do |section|
-      section.lines[1..].map do |line|
-        line.split.map(&:to_i)
-      end
-    end
+    input_sections[1..].map { |section| section.lines[1..].map { |line| line.split.map(&:to_i) } }
   end
 
   def input_sections
