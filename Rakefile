@@ -33,7 +33,7 @@ namespace :aoc do
     spec_dir = File.join("spec", dir_path)
     spec_path = File.join(spec_dir, "solution#{day_str}_spec.rb")
     if File.exist?(spec_path)
-      puts "Spec file already exists: #{spec}"
+      puts "Spec file already exists: #{spec_path}"
     else
       FileUtils.mkdir_p(spec_dir)
       template_path = File.join("templates", "solution_spec.rb.erb")
