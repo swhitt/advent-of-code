@@ -21,15 +21,8 @@ class AoC::Year2023::Solution12 < Base
         groups *= multiplier
       end
 
-      cached_spring_arrangements(pattern, groups)
+      broken_spring_arrangements(pattern, groups)
     end
-  end
-
-  def cached_spring_arrangements(pattern, groups)
-    @broken_spring_cache ||= {}
-    cache_key = [pattern, groups]
-
-    @broken_spring_cache[cache_key] ||= broken_spring_arrangements(pattern, groups)
   end
 
   def broken_spring_arrangements(pattern, groups)
@@ -39,11 +32,11 @@ class AoC::Year2023::Solution12 < Base
     case pattern[0]
     when "."
       # Skip the operational springs at the start of the pattern
-      cached_spring_arrangements(pattern[1..], groups)
+      broken_spring_arrangements(pattern[1..], groups)
     when "?"
       # Check both possibilities for the unknown spring
-      cached_spring_arrangements(pattern.sub("?", "."), groups) +
-        cached_spring_arrangements(pattern.sub("?", "#"), groups)
+      broken_spring_arrangements(pattern.sub("?", "."), groups) +
+        broken_spring_arrangements(pattern.sub("?", "#"), groups)
     when "#"
       # The first spring is definitely broken
       first_group_size = groups.first
@@ -58,12 +51,14 @@ class AoC::Year2023::Solution12 < Base
         0
       else
         # We have a complete match and more groups to go
-        cached_spring_arrangements(pattern[(first_group_size + 1)..], groups[1..])
+        broken_spring_arrangements(pattern[(first_group_size + 1)..], groups[1..])
       end
     else
       raise "Unexpected character"
     end
   end
+
+  memoize(:broken_spring_arrangements)
 end
 
 if __FILE__ == $PROGRAM_NAME

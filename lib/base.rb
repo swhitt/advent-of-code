@@ -28,6 +28,15 @@ class Base
       subclass.solution_path = File.dirname(caller_locations(1..1).first.absolute_path)
       super
     end
+
+    def memoize(method_name)
+      original_method = instance_method(method_name)
+      define_method(method_name) do |*args, **kwargs|
+        @_memoize_cache ||= {}
+        cache_key = [method_name, args, kwargs].hash
+        @_memoize_cache[cache_key] ||= original_method.bind_call(self, *args, **kwargs)
+      end
+    end
   end
 
   attr_accessor :input
