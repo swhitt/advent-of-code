@@ -35,8 +35,8 @@ class AoC::Year2023::Solution05 < Base
     input_sections[0].gsub("seeds: ", "").split.map(&:to_i)
   end
 
-  def map_ranges(range, rules)
-    src_start, src_length = range
+  def map_ranges(source_range, rules)
+    src_start, src_length = source_range
     src_end = src_start + src_length - 1
     output_ranges = []
     current_pos = src_start
@@ -46,27 +46,23 @@ class AoC::Year2023::Solution05 < Base
     sorted_rules.each do |dest_start, rule_src_start, rule_length|
       rule_src_end = rule_src_start + rule_length - 1
       break if current_pos > src_end
-      next if rule_src_end < current_pos
 
       if rule_src_start > current_pos
-        gap_length = [rule_src_start - current_pos, src_end - current_pos + 1].min
-        output_ranges << [current_pos, gap_length] if gap_length > 0
+        gap_end = [rule_src_start - 1, src_end].min
+        output_ranges << [current_pos, gap_end - current_pos + 1] if gap_end >= current_pos
         current_pos = rule_src_start
       end
 
-      if current_pos <= src_end
-        overlap_range = Util.range_intersection(current_pos..src_end, rule_src_start..rule_src_end)
-        if overlap_range
-          dest_overlap_start = dest_start + (overlap_range.begin - rule_src_start)
-          output_ranges << [dest_overlap_start, overlap_range.size]
-        end
+      overlap_end = [rule_src_end, src_end].min + 0
+      if current_pos <= overlap_end
+        dest_overlap_start = dest_start + (current_pos - rule_src_start)
+        output_ranges << [dest_overlap_start, overlap_end - current_pos + 1]
         current_pos = rule_src_end + 1
       end
     end
 
     if current_pos <= src_end
-      remaining_length = src_end - current_pos + 1
-      output_ranges << [current_pos, remaining_length]
+      output_ranges << [current_pos, src_end - current_pos + 1]
     end
 
     output_ranges
