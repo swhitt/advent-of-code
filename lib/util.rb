@@ -64,6 +64,18 @@ module Util
 
     (new_min <= new_max) ? (new_min..new_max) : nil
   end
+
+  def self.picks_theorem_area(interior_points, perimeter_points)
+    interior_points + perimeter_points / 2 - 1
+  end
+
+  def self.polygon_area(vertices)
+    # Shoelace formula
+    vertices.each_with_index.inject(0.0) do |acc, ((x1, y1), i)|
+      x2, y2 = vertices[(i + 1) % vertices.size]
+      acc + (x1 * y2) - (x2 * y1)
+    end.abs / 2.0
+  end
 end
 
 class Object
