@@ -43,14 +43,14 @@ class Base
 
   def initialize(input: nil, input_filename: "input.txt")
     if input
-      puts "Loading input from argument!"
+      puts "Loading input from argument!" unless ENV.key?("TEST")
       @input = input
       return
     end
 
     input_path = File.join(self.class.solution_path, input_filename)
 
-    puts "Loading input from #{input_path}"
+    puts "Loading input from #{input_path}" unless ENV.key?("TEST")
     begin
       @input = File.read(input_path)
     rescue Errno::ENOENT
