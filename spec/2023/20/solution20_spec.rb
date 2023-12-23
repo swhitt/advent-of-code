@@ -26,14 +26,12 @@ RSpec.describe AoC::Year2023::Solution20 do
   context "with real input" do
     describe "#part1" do
       it "calculates the correct answer" do
-        pending("need real part1 answer")
         expect(solution.part1).to eq(879834312)
       end
     end
 
     describe "#part2" do
       it "calculates the correct answer" do
-        pending("need real part2 answer")
         expect(solution.part2).to eq(243037165713371)
       end
     end
