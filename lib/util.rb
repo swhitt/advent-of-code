@@ -42,8 +42,8 @@ module Util
     b.zero? ? a : gcd(b, a % b)
   end
 
-  def self.lcm(a, b)
-    a * b / gcd(a, b)
+  def self.lcm(*args)
+    args.reduce(1, :lcm)
   end
 
   def self.deep_copy(obj)
