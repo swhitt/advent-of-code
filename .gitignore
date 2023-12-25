@@ -10,12 +10,8 @@
 /test/version_tmp/
 /tmp/
 
-# Used by dotenv library to load environment variables.
-.envrc
-
 # Ignore Byebug command history file.
 .byebug_history
-
 
 ## Documentation cache and generated files:
 /.yardoc/
@@ -27,3 +23,12 @@
 /.bundle/
 /vendor/bundle
 /lib/bundler/man/
+
+.ruby-lsp/
+
+.env-secret
+
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
