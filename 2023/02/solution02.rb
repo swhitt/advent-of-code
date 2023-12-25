@@ -1,5 +1,7 @@
 require_relative "../../lib/base"
 
+# Solution for the 2023 day 2 puzzle
+# https://adventofcode.com/2023/day/2
 class AoC::Year2023::Solution02 < Base
   MAX_CUBES = {red: 12, green: 13, blue: 14}.freeze
 

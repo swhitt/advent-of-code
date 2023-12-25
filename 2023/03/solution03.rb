@@ -1,5 +1,7 @@
 require_relative "../../lib/base"
 
+# Solution for the 2023 day 3 puzzle
+# https://adventofcode.com/2023/day/3
 class AoC::Year2023::Solution03 < Base
   attr_reader :adjacent_numbers
 

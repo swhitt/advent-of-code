@@ -2,6 +2,8 @@
 
 require_relative "../../lib/base"
 
+# Solution for the 2023 day 12 puzzle
+# https://adventofcode.com/2023/day/12
 class AoC::Year2023::Solution12 < Base
   def part1
     process_lines

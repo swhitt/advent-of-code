@@ -12,6 +12,8 @@ HAND_STRENGTH = {
   five_of_a_kind: 7
 }
 
+# Solution for the 2023 day 7 puzzle
+# https://adventofcode.com/2023/day/7
 class AoC::Year2023::Solution07 < Base
   def part1
     calculate_total_winnings

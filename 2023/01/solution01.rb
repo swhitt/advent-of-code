@@ -1,5 +1,7 @@
 require_relative "../../lib/base"
 
+# Solution for the 2023 day 1 puzzle
+# https://adventofcode.com/2023/day/1
 class AoC::Year2023::Solution01 < Base
   NUMBER_WORDS_TO_DIGITS = {
     "zero" => "0", "one" => "1", "two" => "2", "three" => "3", "four" => "4",

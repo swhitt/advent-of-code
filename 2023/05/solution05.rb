@@ -1,5 +1,7 @@
 require_relative "../../lib/base"
 
+# Solution for the 2023 day 5 puzzle
+# https://adventofcode.com/2023/day/5
 class AoC::Year2023::Solution05 < Base
   def part1
     # reworked to use the same map_ranges used by part 2

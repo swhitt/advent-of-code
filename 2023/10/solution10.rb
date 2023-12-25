@@ -50,6 +50,8 @@ class Pipe
   end
 end
 
+# Solution for the 2023 day 10 puzzle
+# https://adventofcode.com/2023/day/10
 class AoC::Year2023::Solution10 < Base
   attr_reader :starting_row, :starting_col, :steps
 

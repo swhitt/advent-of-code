@@ -1,5 +1,7 @@
 require_relative "../../lib/base"
 
+# Solution for the 2023 day 8 puzzle
+# https://adventofcode.com/2023/day/8
 module AoC
   module Year2023
     class Navigator

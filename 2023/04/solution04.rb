@@ -1,5 +1,7 @@
 require_relative "../../lib/base"
 
+# Solution for the 2023 day 4 puzzle
+# https://adventofcode.com/2023/day/4
 class AoC::Year2023::Solution04 < Base
   CARD_NUMBER_REGEX = /Card\s+(\d+)/
 

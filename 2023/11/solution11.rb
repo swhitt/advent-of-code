@@ -1,5 +1,7 @@
 require_relative "../../lib/base"
 
+# Solution for the 2023 day 11 puzzle
+# https://adventofcode.com/2023/day/11
 class AoC::Year2023::Solution11 < Base
   def part1
     calculate_distance_with_expansion(2)

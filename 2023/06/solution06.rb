@@ -1,5 +1,7 @@
 require_relative "../../lib/base"
 
+# Solution for the 2023 day 6 puzzle
+# https://adventofcode.com/2023/day/6
 class AoC::Year2023::Solution06 < Base
   def part1
     times, distances = input_lines.map { |line| line.scan(/\d+/).map(&:to_i) }
