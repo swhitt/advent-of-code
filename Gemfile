@@ -3,6 +3,7 @@ ruby file: ".ruby-version"
 gem "pry"
 gem "tzinfo"
 gem "pqueue"
+gem "z3"
 
 group :development, :test do
   gem "standard"
