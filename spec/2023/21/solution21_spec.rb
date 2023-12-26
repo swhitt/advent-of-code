@@ -4,7 +4,6 @@ RSpec.describe AoC::Year2023::Solution21 do
   let(:solution) { described_class.new }
 
   let(:sample_input) do
-    # replace with actual sample data
     <<~EXAMPLE
       ...........
       .....###.#.

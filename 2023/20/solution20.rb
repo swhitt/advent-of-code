@@ -12,9 +12,7 @@ module AoC::Year2023
     end
 
     def part1(button_presses: 1000)
-      button_presses.times.reduce([0, 0]) do |acc, _|
-        simulate_pulse_propagation.zip(acc).map { |pulse_count, total| pulse_count + total }
-      end.reduce(:*)
+      button_presses.times.reduce([0, 0]) { |counts| simulate_pulse_propagation.zip(counts).map(&:sum) }.reduce(:*)
     end
 
     def part2
@@ -36,9 +34,7 @@ module AoC::Year2023
         end
       end
 
-      @module_inputs.each do |module_name, inputs|
-        inputs.each { @modules[module_name]&.inputs&.add(_1) }
-      end
+      @module_inputs.each { |module_name, inputs| inputs.each { @modules[module_name]&.inputs&.add(_1) } }
     end
 
     def create_module(name, module_type)

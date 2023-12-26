@@ -34,58 +34,35 @@ class AoC::Year2023::Solution24 < Base
     x2_0, y2_0 = pos2
     vx2, vy2 = v2
 
-    result = {}
-
-    if vx1 == 0 && vy1 == 0
-      result[:status] = :stationary_line_1
-      return result
-    elsif vx2 == 0 && vy2 == 0
-      result[:status] = :stationary_line_2
-      return result
-    end
+    return {status: :stationary_line_1} if vx1.zero? && vy1.zero?
+    return {status: :stationary_line_2} if vx2.zero? && vy2.zero?
 
     if vy1 * vx2 == vy2 * vx1
-      result[:status] = ((x1_0 - x2_0) * vy1 == (y1_0 - y2_0) * vx1) ? :coincident : :parallel
-      return result
+      status = ((x1_0 - x2_0) * vy1 == (y1_0 - y2_0) * vx1) ? :coincident : :parallel
+      return {status: status}
     end
 
     t2 = (vx1 * y2_0 - vy1 * x2_0 + vy1 * x1_0 - vx1 * y1_0).to_f / (vy1 * vx2 - vy2 * vx1)
-
-    t1 = if vx1 != 0
-      (x2_0 + vx2 * t2 - x1_0) / vx1
-    else
-      (y2_0 + vy2 * t2 - y1_0) / vy1
-    end
+    t1 = (vx1 != 0) ? (x2_0 + vx2 * t2 - x1_0) / vx1 : (y2_0 + vy2 * t2 - y1_0) / vy1
 
     intersection_point = [x2_0 + vx2 * t2, y2_0 + vy2 * t2]
-    result.merge(status: :intersected, intersection_point:, t1:, t2:)
+    {status: :intersected, intersection_point: intersection_point, t1: t1, t2: t2}
   end
 
   def intersects?(h1, h2, test_area)
-    pos1 = h1[:position]
-    v1 = h1[:velocity]
-    pos2 = h2[:position]
-    v2 = h2[:velocity]
+    intersection = find_intersection(pos1: h1[:position], v1: h1[:velocity], pos2: h2[:position], v2: h2[:velocity])
 
-    intersection = find_intersection(pos1: pos1, v1: v1, pos2: pos2, v2: v2)
+    return false unless intersection[:status] == :intersected
 
-    case intersection[:status]
-    when :intersected
-      x, y = intersection[:intersection_point]
-      t1 = intersection[:t1]
-      t2 = intersection[:t2]
-      x >= test_area[:min_x] && x <= test_area[:max_x] &&
-        y >= test_area[:min_y] && y <= test_area[:max_y] &&
-        t1 >= 0 && t2 >= 0
-    else
-      false
-    end
+    x, y = intersection[:intersection_point]
+    t1, t2 = intersection.values_at(:t1, :t2)
+    x.between?(test_area[:min_x], test_area[:max_x]) &&
+      y.between?(test_area[:min_y], test_area[:max_y]) &&
+      t1 >= 0 && t2 >= 0
   end
 
   def count_intersections(hailstones, test_area)
-    hailstones.combination(2).sum do |h1, h2|
-      intersects?(h1, h2, test_area) ? 1 : 0
-    end
+    hailstones.combination(2).sum { intersects?(_1, _2, test_area) ? 1 : 0 }
   end
 
   def solve_with_z3

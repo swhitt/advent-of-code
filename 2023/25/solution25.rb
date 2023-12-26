@@ -18,7 +18,7 @@ class AoC::Year2023::Solution25 < Base
   end
 
   def part2
-    # do it second
+      "We saved Christmas"
   end
 end
 
