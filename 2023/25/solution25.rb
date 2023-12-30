@@ -18,7 +18,7 @@ class AoC::Year2023::Solution25 < Base
   end
 
   def part2
-      "We saved Christmas"
+    "We saved Christmas"
   end
 end
 
@@ -66,12 +66,11 @@ class Graph
   end
 
   def marshal_dump
-    Hash[@vertices] # rubocop:disable Style/HashConversion
+    @vertices.clone.tap { _1.default = nil }
   end
 
   def marshal_load(hash)
-    @vertices = Hash.new { |h, k| h[k] = [] }
-    hash.each { |k, v| @vertices[k] = v }
+    @vertices = hash.tap { _1.default_proc = ->(h, k) { h[k] = [k] } }
   end
 
   def find_min_cut(known_min_cut_size = 3)
