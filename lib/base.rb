@@ -5,6 +5,9 @@ require_relative "input_manager"
 require_relative "util"
 
 module AoC
+  module Year2019
+  end
+
   module Year2020
   end
 
