@@ -5,42 +5,55 @@ require "fileutils"
 namespace :aoc do
   desc "Set up the directory and solution file for a given year and day"
   task :setup, [:year, :day] do |_t, args|
-    day = args[:day].to_i
-    year = args[:year] || Time.now.year
-    day_str = day.to_s.rjust(2, "0")
-    year_str = year.to_s.rjust(4, "0")
+    day = args.fetch(:day).to_i
+    year = args.fetch(:year, Time.now.year).to_i
+
+    day_str = format("%02d", day)
+    year_str = format("%04d", year)
     dir_path = File.join(year_str, day_str)
-    padded_day = day_str.rjust(2, "0")
 
-    if File.directory?(dir_path)
-      puts "Directory already exists: #{dir_path}"
-    else
-      FileUtils.mkdir_p(dir_path)
-      puts "Created directory: #{dir_path}"
-    end
+    create_directory(dir_path)
+    create_solution_file(dir_path, day_str)
+    create_spec_file(dir_path, day_str)
 
-    solution_path = File.join(dir_path, "solution#{day_str}.rb")
-
-    if File.exist?(solution_path)
-      puts "Solution file already exists: #{solution_path}"
-    else
-      template_path = File.join("templates", "solution_template.rb.erb")
-      template = ERB.new(File.read(template_path), trim_mode: "-")
-      File.write(solution_path, template.result(binding))
-      puts "Created solution file: #{solution_path}"
-    end
-
-    spec_dir = File.join("spec", dir_path)
-    spec_path = File.join(spec_dir, "solution#{day_str}_spec.rb")
-    if File.exist?(spec_path)
-      puts "Spec file already exists: #{spec_path}"
-    else
-      FileUtils.mkdir_p(spec_dir)
-      template_path = File.join("templates", "solution_spec.rb.erb")
-      template = ERB.new(File.read(template_path), trim_mode: "-")
-      File.write(spec_path, template.result(binding))
-      puts "Created spec file: #{spec_path}"
-    end
     AoC::InputManager.input_for(day, year)
+  end
+
+  private
+
+  def create_directory(path)
+    if File.directory?(path)
+      puts "Directory already exists: #{path}"
+    else
+      FileUtils.mkdir_p(path)
+      puts "Created directory: #{path}"
+    end
+  end
+
+  def create_solution_file(dir_path, day_str)
+    create_file_from_template(
+      File.join(dir_path, "solution#{day_str}.rb"),
+      "solution_template.rb.erb"
+    )
+  end
+
+  def create_spec_file(dir_path, day_str)
+    spec_dir = File.join("spec", dir_path)
+    FileUtils.mkdir_p(spec_dir)
+    create_file_from_template(
+      File.join(spec_dir, "solution#{day_str}_spec.rb"),
+      "solution_spec.rb.erb"
+    )
+  end
+
+  def create_file_from_template(file_path, template_name)
+    if File.exist?(file_path)
+      puts "File already exists: #{file_path}"
+    else
+      template_path = File.join("templates", template_name)
+      template = ERB.new(File.read(template_path), trim_mode: "-")
+      File.write(file_path, template.result(binding))
+      puts "Created file: #{file_path}"
+    end
   end
 end

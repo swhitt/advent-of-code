@@ -5,19 +5,10 @@ require_relative "input_manager"
 require_relative "util"
 
 module AoC
-  module Year2019
-  end
+  SUPPORTED_YEARS = (2015..Time.now.year)
 
-  module Year2020
-  end
-
-  module Year2021
-  end
-
-  module Year2022
-  end
-
-  module Year2023
+  SUPPORTED_YEARS.each do |year|
+    const_set(:"Year#{year}", Module.new)
   end
 end
 
@@ -45,23 +36,11 @@ class Base
   attr_accessor :input
 
   def initialize(input: nil, input_filename: "input.txt")
-    if input
+    @input = if input
       puts "Loading input from argument!" unless ENV.key?("TEST")
-      @input = input
-      return
-    end
-
-    input_path = File.join(self.class.solution_path, input_filename)
-
-    puts "Loading input from #{input_path}" unless ENV.key?("TEST")
-    begin
-      @input = File.read(input_path)
-    rescue Errno::ENOENT
-      warn "Input file not found: #{input_path}"
-      @input = []
-    rescue => e
-      warn "Error reading input file: #{e.message}"
-      @input = []
+      input
+    else
+      load_input_file(input_filename)
     end
   end
 
@@ -109,5 +88,18 @@ class Base
     else
       Time.at(seconds).utc.strftime("%Hh %Mm %Ss")
     end
+  end
+
+  def load_input_file(input_filename)
+    input_path = File.join(self.class.solution_path, input_filename)
+    puts "Loading input from #{input_path}" unless ENV.key?("TEST")
+
+    File.read(input_path)
+  rescue Errno::ENOENT
+    warn "Input file not found: #{input_path}"
+    []
+  rescue => e
+    warn "Error reading input file: #{e.message}"
+    []
   end
 end

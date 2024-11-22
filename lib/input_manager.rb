@@ -5,7 +5,7 @@ require "fileutils"
 
 module AoC
   module InputManager
-    SESSION_COOKIE = ENV.fetch("AOC_SESSION", nil)
+    SESSION_COOKIE = ENV.fetch("AOC_SESSION") { raise "AOC_SESSION environment variable is required" }
 
     class << self
       def input_for(day, year = Time.now.year)
@@ -70,11 +70,13 @@ module AoC
         FileUtils.mkdir_p(File.dirname(path))
         url = URI("https://adventofcode.com/#{year}/day/#{day}/input")
         puts "Downloading input for day #{day}, year #{year}... (#{url})"
+
         response = fetch_input_from_url(url)
+        return [] if response.nil?
 
         unless response.is_a?(Net::HTTPSuccess)
           puts "Error downloading input: #{response.message}"
-          return
+          return []
         end
 
         File.write(path, response.body)
@@ -85,8 +87,10 @@ module AoC
       def fetch_input_from_url(url)
         request = Net::HTTP::Get.new(url)
         request["Cookie"] = "session=#{SESSION_COOKIE}"
+        request["User-Agent"] = "github.com/swhitt/advent-of-code"
 
         Net::HTTP.start(url.host, url.port, use_ssl: url.scheme == "https") do |http|
+          http.read_timeout = 10
           http.request(request)
         end
       rescue => e
