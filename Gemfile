@@ -1,5 +1,5 @@
 source "https://rubygems.org"
-ruby file: ".ruby-version"
+ruby file: ".tool-versions"
 gem "pry"
 gem "tzinfo"
 gem "pqueue"
