@@ -42,26 +42,26 @@ module AoC
 
       def sleep_until(target_time)
         target_time += 2
-        while Time.now < target_time
+        until Time.now >= target_time
           sleep 1
-          remaining_time = target_time - Time.now
-          print_wait_time(remaining_time, target_time.day, target_time.year)
+          print_wait_time(target_time - Time.now, target_time.day, target_time.year)
         end
       end
 
       def print_wait_time(seconds, day, year = Time.now.year)
-        days, remaining = seconds.divmod(24 * 60 * 60)
-        hours, remaining = remaining.divmod(60 * 60)
-        minutes, seconds = remaining.divmod(60)
-        seconds = seconds.floor # Round down to the nearest whole number
+        units = {
+          d: 24 * 60 * 60,
+          h: 60 * 60,
+          m: 60,
+          s: 1
+        }
 
-        wait_time = ""
-        wait_time += "#{days}d " if days > 0
-        wait_time += "#{hours}h " if hours > 0 || days > 0
-        wait_time += "#{minutes}m " if minutes > 0 || hours > 0 || days > 0
-        wait_time += "#{seconds}s"
+        parts = units.filter_map do |unit, divisor|
+          value, seconds = seconds.divmod(divisor)
+          (value > 0 || parts&.any?) ? "#{value.floor}#{unit} " : nil
+        end.join
 
-        print "\rDay #{day}, year #{year} will be available in #{wait_time}..."
+        print "\rDay #{day}, year #{year} will be available in #{parts}..."
         $stdout.flush
       end
 
@@ -72,7 +72,10 @@ module AoC
         puts "Downloading input for day #{day}, year #{year}... (#{url})"
 
         response = fetch_input_from_url(url)
-        return [] if response.nil?
+        if response.nil?
+          puts "Error: No response received"
+          return []
+        end
 
         unless response.is_a?(Net::HTTPSuccess)
           puts "Error downloading input: #{response.message}"
