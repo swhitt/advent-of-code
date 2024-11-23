@@ -61,8 +61,6 @@ class Base
     binding.pry if debug # rubocop:disable Lint/Debugger
   end
 
-  private
-
   COLOR_CODES = {
     red: 31, green: 32, yellow: 33,
     blue: 34, magenta: 35, cyan: 36
@@ -71,6 +69,8 @@ class Base
   def color_print(str, color = :yellow)
     puts "\e[#{COLOR_CODES.fetch(color, 33)}m#{str}\e[0m"
   end
+
+  private
 
   def execute_part(part)
     result = public_send(part)
