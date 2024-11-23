@@ -9,18 +9,18 @@ class AoC::Year2023::Solution01 < Base
   }.freeze
 
   def part1
-    input_lines.map do |line|
+    input_lines.sum do |line|
       first_digit, last_digit = line.scan(/\d/).values_at(0, -1)
       "#{first_digit}#{last_digit}".to_i
-    end.sum
+    end
   end
 
   def part2
-    input_lines.map do |line|
+    input_lines.sum do |line|
       nums = extract_numbers(line)
       first_digit, last_digit = nums.values_at(0, -1)
       "#{first_digit}#{last_digit}".to_i
-    end.sum
+    end
   end
 
   def extract_numbers(line)
@@ -34,9 +34,4 @@ class AoC::Year2023::Solution01 < Base
       end
     end
   end
-end
-
-if __FILE__ == $PROGRAM_NAME
-  solution = AoC::Year2023::Solution01.new
-  solution.run
 end

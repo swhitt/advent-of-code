@@ -34,7 +34,7 @@ class AoC::Year2023::Solution12 < Base
     case pattern[0]
     when "."
       # Skip the operational springs at the start of the pattern
-      broken_spring_arrangements(pattern[1..], groups)
+      broken_spring_arrangements(pattern[1..], groups) # rubocop:disable Performance/ArraySemiInfiniteRangeSlice
     when "?"
       # Check both possibilities for the unknown spring
       broken_spring_arrangements(pattern.sub("?", "."), groups) +
@@ -53,17 +53,12 @@ class AoC::Year2023::Solution12 < Base
         0
       else
         # We have a complete match and more groups to go
-        broken_spring_arrangements(pattern[(first_group_size + 1)..], groups[1..])
+        broken_spring_arrangements(pattern[(first_group_size + 1)..], groups[1..]) # rubocop:disable Performance/ArraySemiInfiniteRangeSlice
       end
     else
       raise "Unexpected character"
     end
   end
 
-  memoize(:broken_spring_arrangements)
-end
-
-if __FILE__ == $PROGRAM_NAME
-  solution = AoC::Year2023::Solution12.new
-  solution.run
+  memo_wise :broken_spring_arrangements
 end

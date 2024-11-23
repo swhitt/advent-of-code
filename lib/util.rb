@@ -9,8 +9,11 @@ module Util
     def grid_neighbors(grid, row, col, diagonals: false)
       directions = [[-1, 0], [1, 0], [0, -1], [0, 1]]
       directions += [[-1, -1], [-1, 1], [1, -1], [1, 1]] if diagonals
+
+      max_row, max_col = grid.size, grid.first.size
       directions.filter_map do |dx, dy|
-        [row + dx, col + dy] if (0...grid.size).cover?(row + dx) && (0...grid.first.size).cover?(col + dy)
+        new_row, new_col = row + dx, col + dy
+        [new_row, new_col] if (0...max_row).cover?(new_row) && (0...max_col).cover?(new_col)
       end
     end
 
@@ -36,7 +39,7 @@ module Util
     end
 
     def frequency(array)
-      array.each_with_object(Hash.new(0)) { |item, counts| counts[item] += 1 }
+      array.tally
     end
 
     def gcd(a, b)
@@ -76,6 +79,63 @@ module Util
         x2, y2 = vertices[(i + 1) % vertices.size]
         acc + (x1 * y2) - (x2 * y1)
       end.abs / 2.0
+    end
+
+    def grid_to_hash(grid)
+      grid.each_with_index.flat_map do |row, y|
+        row.each_with_index.map { |val, x| [[x, y], val] }
+      end.to_h
+    end
+
+    def hash_to_grid(hash)
+      max_x = hash.keys.map(&:first).max
+      max_y = hash.keys.map(&:last).max
+      Array.new(max_y + 1) { |y| Array.new(max_x + 1) { |x| hash[[x, y]] } }
+    end
+
+    def dijkstra(start, goal, neighbors_func)
+      distances = {start => 0}
+      queue = priority_queue { |a, b| distances[a] < distances[b] }
+      queue << start
+      came_from = {}
+
+      until queue.empty?
+        current = queue.pop
+        return [distances[goal], came_from] if current == goal
+
+        neighbors_func.call(current).each do |neighbor, cost|
+          tentative = distances[current] + cost
+          if !distances.key?(neighbor) || tentative < distances[neighbor]
+            distances[neighbor] = tentative
+            came_from[neighbor] = current
+            queue << neighbor
+          end
+        end
+      end
+      nil
+    end
+
+    def bfs(start, goal_func, neighbors_func)
+      queue = [start]
+      visited = {start => nil}
+
+      until queue.empty?
+        current = queue.shift
+        return [current, visited] if goal_func.call(current)
+
+        neighbors_func.call(current).each do |neighbor|
+          next if visited.key?(neighbor)
+          visited[neighbor] = current
+          queue << neighbor
+        end
+      end
+      nil
+    end
+
+    def visualize_path(grid, path, path_char = "•")
+      grid = deep_copy(grid)
+      path.each { |x, y| grid[y][x] = path_char }
+      print_grid(grid)
     end
   end
 end

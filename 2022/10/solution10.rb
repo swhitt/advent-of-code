@@ -14,7 +14,7 @@ class AoC::Year2022::Solution10 < Base
   def execute
     CPU.process(input_lines)
   end
-  memoize(:execute)
+  memo_wise :execute
 end
 
 class CPU
@@ -76,9 +76,4 @@ class CPU
   def current_row
     current_index / DISPLAY_WIDTH
   end
-end
-
-if __FILE__ == $PROGRAM_NAME
-  solution = AoC::Year2022::Solution10.new
-  solution.run
 end

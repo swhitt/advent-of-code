@@ -1,6 +1,7 @@
 require "bundler/setup"
 require "pry"
 require "benchmark"
+require "memo_wise"
 require_relative "input_manager"
 require_relative "util"
 
@@ -13,22 +14,21 @@ module AoC
 end
 
 class Base
-  @solution_path = nil
+  prepend MemoWise
+
+  singleton_class.attr_accessor :autorun_enabled
+  @autorun_enabled = true
+
+  at_exit { Base.autorun if $PROGRAM_NAME == $0 && Base.autorun_enabled }
 
   class << self
-    attr_accessor :solution_path
+    def autorun
+      return unless /solution\d{1,2}\.rb$/.match?($PROGRAM_NAME)
 
-    def inherited(subclass)
-      subclass.solution_path = File.dirname(caller_locations(1..1).first.absolute_path)
-      super
-    end
-
-    def memoize(method_name)
-      original_method = instance_method(method_name)
-      define_method(method_name) do |*args, **kwargs|
-        @_memoize_cache ||= {}
-        cache_key = [method_name, args, kwargs].hash
-        @_memoize_cache[cache_key] ||= original_method.bind_call(self, *args, **kwargs)
+      klass_path = File.expand_path($PROGRAM_NAME)
+      if (match = klass_path.match(%r{(?<year>\d{4})/(?<day>\d{1,2})/solution\d{1,2}\.rb$}))
+        solution_class = Object.const_get("AoC::Year#{match[:year]}::Solution#{match[:day]}")
+        solution_class.new.run
       end
     end
   end
@@ -36,12 +36,7 @@ class Base
   attr_accessor :input
 
   def initialize(input: nil, input_filename: "input.txt")
-    @input = if input
-      puts "Loading input from argument!" unless ENV.key?("TEST")
-      input
-    else
-      load_input_file(input_filename)
-    end
+    @input = input || load_input_file(input_filename)
   end
 
   def part1(input)
@@ -57,49 +52,54 @@ class Base
   end
 
   def run(debug = true)
-    part1_time = Benchmark.realtime { execute_and_rescue(:part1) }
-    part2_time = Benchmark.realtime { execute_and_rescue(:part2) }
-
-    puts "\nPart1 time: #{format_duration(part1_time)}"
-    puts "Part2 time: #{format_duration(part2_time)}"
+    %i[part1 part2].each do |part|
+      puts unless part == :part1
+      time = Benchmark.realtime { execute_part(part) }
+      puts "#{part.capitalize} time: #{format_duration(time)}"
+    end
 
     binding.pry if debug # rubocop:disable Lint/Debugger
   end
 
   private
 
-  def execute_and_rescue(method_name)
-    puts "#{method_name.to_s.capitalize}: #{send(method_name)}"
+  COLOR_CODES = {
+    red: 31, green: 32, yellow: 33,
+    blue: 34, magenta: 35, cyan: 36
+  }.freeze
+
+  def color_print(str, color = :yellow)
+    puts "\e[#{COLOR_CODES.fetch(color, 33)}m#{str}\e[0m"
+  end
+
+  def execute_part(part)
+    result = public_send(part)
+    color_print("#{part.capitalize}: #{result}", :cyan)
   rescue => e
-    puts "#{method_name.to_s.capitalize} failed: #{e.class} - #{e.message}"
-    puts "Backtrace:\n\t#{e.backtrace.join("\n\t")}"
+    color_print("#{part.capitalize} failed: #{e.class} - #{e.message}", :red)
+    color_print("Backtrace:\n\t#{e.backtrace.join("\n\t")}", :red)
   end
 
   def format_duration(seconds)
-    case seconds
-    when 0...5
-      milliseconds = seconds * 1000
-      if milliseconds < 1
-        microseconds = milliseconds * 1000
-        "#{microseconds.round(2)}μs"
-      else
-        "#{milliseconds.round(2)}ms"
-      end
+    if seconds < 5
+      time_ms = seconds * 1000
+      (time_ms < 1) ? "#{(time_ms * 1000).round(2)}μs" : "#{time_ms.round(2)}ms"
     else
       Time.at(seconds).utc.strftime("%Hh %Mm %Ss")
     end
   end
 
   def load_input_file(input_filename)
-    input_path = File.join(self.class.solution_path, input_filename)
+    input_path = File.join(solution_path, input_filename)
     puts "Loading input from #{input_path}" unless ENV.key?("TEST")
 
     File.read(input_path)
-  rescue Errno::ENOENT
-    warn "Input file not found: #{input_path}"
-    []
   rescue => e
     warn "Error reading input file: #{e.message}"
     []
+  end
+
+  def solution_path
+    File.dirname(File.expand_path($PROGRAM_NAME))
   end
 end

@@ -4,6 +4,7 @@ gem "pry"
 gem "tzinfo"
 gem "pqueue"
 gem "z3"
+gem "memo_wise"
 
 group :development, :test do
   gem "standard"

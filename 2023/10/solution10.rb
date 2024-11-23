@@ -157,8 +157,3 @@ class AoC::Year2023::Solution10 < Base
     end
   end
 end
-
-if __FILE__ == $PROGRAM_NAME
-  solution = AoC::Year2023::Solution10.new
-  solution.run
-end
