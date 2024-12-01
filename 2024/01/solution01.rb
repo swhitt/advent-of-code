@@ -8,8 +8,7 @@ class AoC::Year2024::Solution01 < Base
 
   def part2
     left, right = number_columns
-    common_numbers = left & right
-    common_numbers.sum { |num| left.count(num) * right.count(num) * num }
+    (left & right).sum { |num| left.count(num) * right.count(num) * num }
   end
 
   private
