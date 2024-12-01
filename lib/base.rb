@@ -19,6 +19,9 @@ module AoC
 
   module Year2023
   end
+
+  module Year2024
+  end
 end
 
 class Base
