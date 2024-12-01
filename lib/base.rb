@@ -5,22 +5,8 @@ require_relative "input_manager"
 require_relative "util"
 
 module AoC
-  module Year2019
-  end
-
-  module Year2020
-  end
-
-  module Year2021
-  end
-
-  module Year2022
-  end
-
-  module Year2023
-  end
-
-  module Year2024
+  (2019..Time.now.year).each do |year|
+    const_set(:"Year#{year}", Module.new)
   end
 end
 
@@ -31,40 +17,44 @@ class Base
     attr_accessor :solution_path
 
     def inherited(subclass)
-      subclass.solution_path = File.dirname(caller_locations(1..1).first.absolute_path)
       super
+      caller_file = caller_locations(1..1).first.absolute_path
+      subclass.solution_path = File.dirname(caller_file)
+
+      at_exit do
+        if File.expand_path($PROGRAM_NAME) == File.expand_path($0) && !defined?(RSpec)
+          subclass.new.run
+        end
+      end
     end
 
     def memoize(method_name)
       original_method = instance_method(method_name)
       define_method(method_name) do |*args, **kwargs|
         @_memoize_cache ||= {}
-        cache_key = [method_name, args, kwargs].hash
-        @_memoize_cache[cache_key] ||= original_method.bind_call(self, *args, **kwargs)
+        @_memoize_cache[[method_name, args, kwargs].hash] ||= original_method.bind_call(self, *args, **kwargs)
       end
     end
   end
 
-  attr_accessor :input
+  attr_reader :input
 
   def initialize(input: nil, input_filename: "input.txt")
-    if input
-      puts "Loading input from argument!" unless ENV.key?("TEST")
-      @input = input
-      return
-    end
+    @input = if input
+      input
+    else
+      input_path = File.join(self.class.solution_path, input_filename)
+      puts "Loading input from #{input_path}" unless ENV.key?("TEST")
 
-    input_path = File.join(self.class.solution_path, input_filename)
-
-    puts "Loading input from #{input_path}" unless ENV.key?("TEST")
-    begin
-      @input = File.read(input_path)
-    rescue Errno::ENOENT
-      warn "Input file not found: #{input_path}"
-      @input = []
-    rescue => e
-      warn "Error reading input file: #{e.message}"
-      @input = []
+      begin
+        File.read(input_path)
+      rescue Errno::ENOENT
+        warn "Input file not found: #{input_path}"
+        []
+      rescue => e
+        warn "Error reading input file: #{e.message}"
+        []
+      end
     end
   end
 
@@ -76,27 +66,38 @@ class Base
     raise NotImplementedError, "Please implement part2"
   end
 
-  def input_lines
-    input.split("\n")
-  end
+  def input_lines = input.split("\n")
 
   def run(debug = true)
-    part1_time = Benchmark.realtime { execute_and_rescue(:part1) }
-    part2_time = Benchmark.realtime { execute_and_rescue(:part2) }
+    results = {
+      part1: benchmark { execute_and_rescue(:part1) },
+      part2: benchmark { execute_and_rescue(:part2) }
+    }
 
-    puts "\nPart1 time: #{format_duration(part1_time)}"
-    puts "Part2 time: #{format_duration(part2_time)}"
+    results.each do |part, (duration, _)|
+      puts "#{part.capitalize} time: #{format_duration(duration)}"
+    end
 
     binding.pry if debug # rubocop:disable Lint/Debugger
   end
 
   private
 
+  def benchmark
+    start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    result = yield
+    duration = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+    [duration, result]
+  end
+
   def execute_and_rescue(method_name)
-    puts "#{method_name.to_s.capitalize}: #{send(method_name)}"
+    result = send(method_name)
+    puts "#{method_name.to_s.capitalize}: #{result}"
+    result
   rescue => e
     puts "#{method_name.to_s.capitalize} failed: #{e.class} - #{e.message}"
     puts "Backtrace:\n\t#{e.backtrace.join("\n\t")}"
+    nil
   end
 
   def format_duration(seconds)
@@ -104,8 +105,7 @@ class Base
     when 0...5
       milliseconds = seconds * 1000
       if milliseconds < 1
-        microseconds = milliseconds * 1000
-        "#{microseconds.round(2)}μs"
+        "#{(milliseconds * 1000).round(2)}μs"
       else
         "#{milliseconds.round(2)}ms"
       end

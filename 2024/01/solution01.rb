@@ -19,8 +19,3 @@ class AoC::Year2024::Solution01 < Base
       .transpose
   end
 end
-
-if __FILE__ == $PROGRAM_NAME
-  solution = AoC::Year2024::Solution01.new
-  solution.run
-end
