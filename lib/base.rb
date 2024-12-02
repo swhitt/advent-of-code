@@ -18,14 +18,9 @@ class Base
 
     def inherited(subclass)
       super
-      caller_file = caller_locations(1..1).first.absolute_path
-      subclass.solution_path = File.dirname(caller_file)
+      subclass.solution_path = File.dirname(caller_locations(1..1).first.absolute_path)
 
-      at_exit do
-        if File.expand_path($PROGRAM_NAME) == File.expand_path($0) && !defined?(RSpec)
-          subclass.new.run
-        end
-      end
+      at_exit { subclass.new.run if run_at_exit? }
     end
 
     def memoize(method_name)
@@ -35,27 +30,18 @@ class Base
         @_memoize_cache[[method_name, args, kwargs].hash] ||= original_method.bind_call(self, *args, **kwargs)
       end
     end
+
+    private
+
+    def run_at_exit?
+      File.expand_path($PROGRAM_NAME) == File.expand_path($0) && !defined?(RSpec)
+    end
   end
 
   attr_reader :input
 
   def initialize(input: nil, input_filename: "input.txt")
-    @input = if input
-      input
-    else
-      input_path = File.join(self.class.solution_path, input_filename)
-      puts "Loading input from #{input_path}" unless ENV.key?("TEST")
-
-      begin
-        File.read(input_path)
-      rescue Errno::ENOENT
-        warn "Input file not found: #{input_path}"
-        []
-      rescue => e
-        warn "Error reading input file: #{e.message}"
-        []
-      end
-    end
+    @input = input || load_input(input_filename)
   end
 
   def part1(input)
@@ -68,26 +54,40 @@ class Base
 
   def input_lines = input.split("\n")
 
+  def input_nums = input_lines.map { _1.split.map(&:to_i) }
+
   def run(debug = true)
-    results = {
-      part1: benchmark { execute_and_rescue(:part1) },
-      part2: benchmark { execute_and_rescue(:part2) }
-    }
-
-    results.each do |part, (duration, _)|
-      puts "#{part.capitalize} time: #{format_duration(duration)}"
-    end
-
+    results = benchmark_parts
+    display_results(results)
     binding.pry if debug # rubocop:disable Lint/Debugger
   end
 
   private
 
-  def benchmark
-    start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
-    result = yield
-    duration = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
-    [duration, result]
+  def load_input(filename)
+    input_path = File.join(self.class.solution_path, filename)
+    puts "Loading input from #{input_path}" unless ENV.key?("TEST")
+
+    File.read(input_path)
+  rescue Errno::ENOENT
+    warn "Input file not found: #{input_path}"
+    []
+  rescue => e
+    warn "Error reading input file: #{e.message}"
+    []
+  end
+
+  def benchmark_parts
+    {
+      part1: Benchmark.measure { execute_and_rescue(:part1) },
+      part2: Benchmark.measure { execute_and_rescue(:part2) }
+    }
+  end
+
+  def display_results(results)
+    results.each do |part, result|
+      puts "#{part.capitalize} time: #{format_duration(result.real)}"
+    end
   end
 
   def execute_and_rescue(method_name)
