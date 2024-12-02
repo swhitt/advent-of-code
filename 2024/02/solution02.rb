@@ -4,15 +4,11 @@ require_relative "../../lib/base"
 # https://adventofcode.com/2024/day/2
 class AoC::Year2024::Solution02 < Base
   def part1
-    reports.count { safe_report?(_1) }
+    input_nums.count { safe_report?(_1) }
   end
 
   def part2
-    reports.count { safe_with_problem_dampener?(_1) }
-  end
-
-  def reports
-    input_lines.map { _1.split.map(&:to_i) }
+    input_nums.count { safe_with_problem_dampener?(_1) }
   end
 
   def safe_report?(report)
