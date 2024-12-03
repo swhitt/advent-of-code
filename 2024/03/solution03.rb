@@ -9,15 +9,13 @@ class AoC::Year2024::Solution03 < Base
 
   def part2
     enabled = true
-    input.scan(/mul\(\d+,\d+\)|do\(\)|don't\(\)/).sum do |instruction|
-      case instruction
+    input.scan(/mul\(\d+,\d+\)|do\(\)|don't\(\)/).sum do |cmd|
+      case cmd
       when "do()" then enabled = true
                        0
       when "don't()" then enabled = false
                           0
-      else
-        next 0 unless enabled
-        instruction.scan(/\d+/).map(&:to_i).reduce(:*)
+      else enabled ? cmd.scan(/\d+/).map(&:to_i).reduce(:*) : 0
       end
     end
   end
