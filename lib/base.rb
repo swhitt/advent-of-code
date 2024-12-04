@@ -52,7 +52,7 @@ class Base
     raise NotImplementedError, "Please implement part2"
   end
 
-  def input_lines = input.split("\n")
+  def input_lines(split = "\n") = input.split(split)
 
   def input_nums = input_lines.map { _1.split.map(&:to_i) }
 
