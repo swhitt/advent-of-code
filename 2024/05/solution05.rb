@@ -4,21 +4,20 @@ require_relative "../../lib/base"
 # https://adventofcode.com/2024/day/5
 class AoC::Year2024::Solution05 < Base
   def part1
-    rules, sequences = parse_input(input)
-    sequences.select { |seq| valid_sequence?(seq, rules) }
-      .sum { _1[_1.length / 2] }
+    rules, sequences = parse_input
+    sequences.select { valid_sequence?(_1, rules) }.sum { median(_1) }
   end
 
   def part2
-    rules, sequences = parse_input(input)
-    sequences.reject { |seq| valid_sequence?(seq, rules) }
+    rules, sequences = parse_input
+    sequences.reject { valid_sequence?(_1, rules) }
       .map! { sort_sequence(_1, rules) }
-      .sum { _1[_1.length / 2] }
+      .sum { median(_1) }
   end
 
   private
 
-  def parse_input(input)
+  def parse_input
     rules_text, sequences_text = input.split("\n\n")
     rules = Hash.new { |h, k| h[k] = Set.new }
 
@@ -47,5 +46,9 @@ class AoC::Year2024::Solution05 < Base
         0
       end
     end
+  end
+
+  def median(arr)
+    arr[arr.size / 2]
   end
 end

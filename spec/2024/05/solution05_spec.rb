@@ -62,7 +62,6 @@ RSpec.describe AoC::Year2024::Solution05 do
 
     describe "#part2" do
       it "calculates the correct answer" do
-        pending("need real part2 answer")
         expect(solution.part2).to eq(6370)
       end
     end
