@@ -9,13 +9,9 @@ class AoC::Year2024::Solution07 < Base
     :"||" => ->(a, b) { (a.to_s + b.to_s).to_i }
   }
 
-  def part1
-    solve([:+, :*])
-  end
+  def part1 = solve([:+, :*])
 
-  def part2
-    solve([:+, :*, :"||"])
-  end
+  def part2 = solve([:+, :*, :"||"])
 
   private
 
@@ -32,8 +28,10 @@ class AoC::Year2024::Solution07 < Base
   end
 
   def reachable?(numbers, target, ops, cache = {})
-    return cache[[numbers, target]] if cache.key?([numbers, target])
-    cache[[numbers, target]] = if numbers.size == 1
+    key = numbers.hash ^ target.hash
+    return cache[key] if cache.key?(key)
+
+    cache[key] = if numbers.size == 1
       numbers.first == target
     else
       ops.any? { |op| reachable?([OPERATORS[op].call(numbers[0], numbers[1]), *numbers.drop(2)], target, ops, cache) }
