@@ -34,7 +34,11 @@ class AoC::Year2024::Solution07 < Base
     cache[key] = if numbers.size == 1
       numbers.first == target
     else
-      ops.any? { |op| reachable?([OPERATORS[op].call(numbers[0], numbers[1]), *numbers.drop(2)], target, ops, cache) }
+      ops.any? do |op|
+        result = OPERATORS[op].call(numbers[0], numbers[1])
+        next false if result > target # these operators only increase the result so bail early
+        reachable?([result, *numbers.drop(2)], target, ops, cache)
+      end
     end
   end
 end
