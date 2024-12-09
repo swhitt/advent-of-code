@@ -4,75 +4,58 @@ require_relative "../../lib/base"
 # https://adventofcode.com/2024/day/8
 class AoC::Year2024::Solution08 < Base
   def part1
-    find_part1_antinode_positions(*node_map_and_dimensions).size
+    dimensions = [grid.size, grid.first.size]
+    find_nodes(grid).values.flat_map do |positions|
+      positions.combination(2).flat_map do |first, second|
+        vector = second.zip(first).map! { |a, b| a - b }
+        [
+          first.zip(vector).map! { |pos, v| pos - v },
+          second.zip(vector).map! { |pos, v| pos + v }
+        ]
+      end
+    end.uniq.count { |x, y| in_bounds?(x, y, dimensions) }
   end
 
   def part2
-    find_part2_antinode_positions(*node_map_and_dimensions).size
+    dimensions = [grid.size, grid.first.size]
+    find_nodes(grid).values.flat_map do |positions|
+      positions.combination(2).flat_map do |first, second|
+        vector = second.zip(first).map! { |a, b| a - b }
+        [
+          collect_points(first, vector, -1, dimensions),
+          collect_points(second, vector, 1, dimensions)
+        ]
+      end
+    end.flatten(1).uniq!.size
   end
 
   private
 
-  def node_map_and_dimensions
-    lines = input_lines.reject(&:empty?)
-    dimensions = [lines.size, lines.first.size]
-    [build_node_map(lines), dimensions]
+  def grid
+    @grid ||= input_lines.reject(&:empty?)
   end
 
-  def build_node_map(lines)
-    lines.flat_map.with_index do |row, i|
-      row.chars.map.with_index { |cell, j| [cell, [i, j]] unless cell == "." }
-    end.compact.group_by(&:first).transform_values { _1.map(&:last) }
+  def in_bounds?(x, y, dimensions)
+    x.between?(0, dimensions[0] - 1) && y.between?(0, dimensions[1] - 1)
   end
 
-  def find_part1_antinode_positions(nodes, dimensions)
-    nodes.values.each_with_object(Set.new) do |positions, antinodes|
-      positions.combination(2).flat_map { |a, b| [[a, b], [b, a]] }.each do |from, to|
-        candidate = from.zip(to).map { |a, b| 2 * b - a }
-        antinodes << candidate if candidate.zip(dimensions).all? { |coord, limit| coord.between?(0, limit - 1) }
+  def collect_points(start, vector, direction, dimensions)
+    pos = start.dup
+    [].tap do |points|
+      while in_bounds?(*pos, dimensions)
+        points << pos.dup
+        pos.each_index { |i| pos[i] += vector[i] * direction }
       end
     end
   end
 
-  def find_part2_antinode_positions(nodes, dimensions)
-    nodes.values.select { |pos| pos.size >= 2 }.each_with_object(Set.new) do |positions, antinodes|
-      # find lines from at least two antennas of the same frequency
-      line_map = Hash.new { |h, k| h[k] = Set.new }
-
-      positions.combination(2).each do |(x1, y1), (x2, y2)|
-        dx, dy = x2 - x1, y2 - y1
-        g = dx.gcd(dy)
-        dx, dy = dx.fdiv(g), dy.fdiv(g)
-        dx, dy = -dx, -dy if dx < 0 || (dx == 0 && dy < 0)
-
-        # perpendicular normal
-        offset = dy * x1 - dx * y1
-        line_map[[dx, dy, offset]] << [x1, y1] << [x2, y2]
-      end
-
-      # >2 antennas,
-      # enumerate all collinear points within the map
-      line_map.each do |(dx, dy, _offset), ants|
-        next if ants.size < 2
-        antinodes.merge(all_points_on_line(ants.first, dx, dy, dimensions))
+  def find_nodes(grid)
+    Hash.new { |h, k| h[k] = [] }.tap do |nodes|
+      grid.each_with_index do |row, i|
+        row.chars.each_with_index do |cell, j|
+          nodes[cell] << [i, j] unless cell == "."
+        end
       end
     end
-  end
-
-  def all_points_on_line(base, dx, dy, dimensions)
-    x0, y0 = base
-    max_x, max_y = dimensions
-
-    t_bounds = ->(coord, delta, max) {
-      return [-Float::INFINITY, Float::INFINITY] if delta.zero?
-      [(max - 1 - coord) / delta.to_f, -coord / delta.to_f].sort
-    }
-
-    t_min_x, t_max_x = t_bounds[x0, dx, max_x]
-    t_min_y, t_max_y = t_bounds[y0, dy, max_y]
-    t_min = [t_min_x, t_min_y].max.ceil
-    t_max = [t_max_x, t_max_y].min.floor
-
-    (t_min..t_max).map { |t| [x0 + t * dx, y0 + t * dy] }
   end
 end
