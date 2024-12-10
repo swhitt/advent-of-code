@@ -4,6 +4,7 @@ require_relative "../../lib/base"
 # https://adventofcode.com/2024/day/10
 class AoC::Year2024::Solution10 < Base
   DIRECTIONS = [[0, 1], [0, -1], [1, 0], [-1, 0]].freeze
+  MAX_HEIGHT = 9
 
   def part1
     find_trailheads.sum { |x, y| explore_trails(x, y) }
@@ -20,41 +21,52 @@ class AoC::Year2024::Solution10 < Base
   end
 
   def find_trailheads
-    grid.each_with_index.flat_map do |row, y|
-      row.each_with_index.filter_map do |height, x|
-        [x, y] if height.zero?
-      end
+    grid.flat_map.with_index do |row, y|
+      row.each_index.filter_map { [_1, y] if row[_1].zero? }
     end
   end
 
   def explore_trails(start_x, start_y, mode: :peaks)
-    height = grid.size
-    width = grid[0].size
     results = Set.new
-    initial_state = (mode == :peaks) ? [[start_x, start_y, Set.new]] : [[start_x, start_y, []]]
+    initial_tracking = (mode == :peaks) ? Set.new : [[start_x, start_y]]
+    queue = [[start_x, start_y, initial_tracking]]
 
-    while (x, y, tracking = initial_state.shift)
-      current_height = grid[y][x]
-      visited = (mode == :peaks) ? tracking : tracking + [[x, y]]
-      next if mode == :peaks && tracking.include?([x, y])
-
-      if current_height == 9
-        results << ((mode == :peaks) ? [x, y] : visited)
-        next
-      end
-
-      DIRECTIONS.each do |dx, dy|
-        new_x = x + dx
-        new_y = y + dy
-
-        next if new_x < 0 || new_x >= width || new_y < 0 || new_y >= height
-        next if visited.include?([new_x, new_y])
-        next unless grid[new_y][new_x] == current_height + 1
-
-        initial_state << [new_x, new_y, visited]
-      end
+    while (current = queue.shift)
+      process_point(current, results, queue, mode)
     end
 
     results.size
+  end
+
+  def process_point(current, results, queue, mode)
+    x, y, tracking = current
+    return if mode == :peaks && tracking.include?([x, y])
+
+    current_height = grid[y][x]
+    if current_height == MAX_HEIGHT
+      results << ((mode == :peaks) ? [x, y] : tracking)
+      return
+    end
+
+    find_valid_neighbors(x, y, current_height, tracking).each do |new_x, new_y|
+      queue << [new_x, new_y, (mode == :peaks) ? tracking : tracking + [[new_x, new_y]]]
+    end
+  end
+
+  def find_valid_neighbors(x, y, current_height, visited)
+    DIRECTIONS.filter_map do |dx, dy|
+      new_x, new_y = x + dx, y + dy
+      if valid_point?(new_x, new_y, visited) && grid[new_y][new_x] == current_height + 1
+        [new_x, new_y]
+      end
+    end
+  end
+
+  def valid_point?(x, y, visited)
+    x >= 0 &&
+      x < grid[0].size &&
+      y >= 0 &&
+      y < grid.size &&
+      !visited.include?([x, y])
   end
 end
