@@ -1,6 +1,7 @@
 require "bundler/setup"
 require "pry"
 require "benchmark"
+require "matrix"
 require_relative "input_manager"
 require_relative "util"
 

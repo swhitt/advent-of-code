@@ -4,10 +4,10 @@ require_relative "../../lib/base"
 # https://adventofcode.com/2024/day/12
 class AoC::Year2024::Solution12 < Base
   DIRECTIONS = [
-    Point[0, -1],
-    Point[0, 1],
-    Point[-1, 0],
-    Point[1, 0]
+    Vector[0, -1],
+    Vector[0, 1],
+    Vector[-1, 0],
+    Vector[1, 0]
   ].freeze
 
   def part1 = find_regions.sum { |region| region.size * count_external_edges(region) }
@@ -60,7 +60,7 @@ class AoC::Year2024::Solution12 < Base
         next if region.include?(point + dir)
 
         current = point
-        walk_dir = Point[-dir.y, dir.x]
+        walk_dir = Vector[-dir[1], dir[0]]
 
         while region.include?(current + walk_dir) && !region.include?(current + dir + walk_dir)
           current += walk_dir
@@ -75,7 +75,7 @@ class AoC::Year2024::Solution12 < Base
 
   def parse_grid
     input_lines.each_with_index.flat_map do |line, y|
-      line.chars.each_with_index.map { |char, x| [Point[x, y], char] }
+      line.chars.each_with_index.map { |char, x| [Vector[x, y], char] }
     end.to_h
   end
 end

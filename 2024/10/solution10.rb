@@ -3,7 +3,6 @@ require_relative "../../lib/base"
 # Solution for the 2024 day 10 puzzle
 # https://adventofcode.com/2024/day/10
 class AoC::Year2024::Solution10 < Base
-  Point = Data.define(:x, :y)
   DIRECTIONS = [[0, 1], [0, -1], [1, 0], [-1, 0]].freeze
   MAX_HEIGHT = 9
 
@@ -23,7 +22,7 @@ class AoC::Year2024::Solution10 < Base
 
   def find_trailheads
     grid.flat_map.with_index do |row, y|
-      row.each_index.filter_map { |x| Point.new(x:, y:) if row[x].zero? }
+      row.each_index.filter_map { |x| Vector[x, y] if row[x].zero? }
     end
   end
 
@@ -43,7 +42,7 @@ class AoC::Year2024::Solution10 < Base
     point, tracking = current
     return if mode == :peaks && tracking.include?(point)
 
-    current_height = grid[point.y][point.x]
+    current_height = grid[point[1]][point[0]]
     if current_height == MAX_HEIGHT
       results << ((mode == :peaks) ? point : tracking)
       return
@@ -56,18 +55,18 @@ class AoC::Year2024::Solution10 < Base
 
   def find_valid_neighbors(point, current_height, visited)
     DIRECTIONS.filter_map do |dy, dx|
-      new_point = Point.new(x: point.x + dx, y: point.y + dy)
-      if valid_point?(new_point, visited) && grid[new_point.y][new_point.x] == current_height + 1
+      new_point = Vector[point[0] + dx, point[1] + dy]
+      if valid_point?(new_point, visited) && grid[new_point[1]][new_point[0]] == current_height + 1
         new_point
       end
     end
   end
 
   def valid_point?(point, visited)
-    point.y >= 0 &&
-      point.y < grid.size &&
-      point.x >= 0 &&
-      point.x < grid[0].size &&
+    point[1] >= 0 &&
+      point[1] < grid.size &&
+      point[0] >= 0 &&
+      point[0] < grid[0].size &&
       !visited.include?(point)
   end
 end
