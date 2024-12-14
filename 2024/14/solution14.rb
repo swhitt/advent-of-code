@@ -7,70 +7,60 @@ class AoC::Year2024::Solution14 < Base
   HEIGHT = 103
 
   Robot = Data.define(:x, :y, :vx, :vy) do
-    def move
-      Robot.new((x + vx) % WIDTH, (y + vy) % HEIGHT, vx, vy)
-    end
+    def at_step(t) = Robot.new((x + vx * t) % WIDTH, (y + vy * t) % HEIGHT, vx, vy)
 
     def quadrant
       return if x == WIDTH / 2 || y == HEIGHT / 2
 
-      case [x < WIDTH / 2, y < HEIGHT / 2]
-      in [true, true] then :top_left
-      in [false, true] then :top_right
-      in [true, false] then :bottom_left
-      in [false, false] then :bottom_right
-      end
+      quadrants = {
+        [true, true] => :top_left,
+        [false, true] => :top_right,
+        [true, false] => :bottom_left,
+        [false, false] => :bottom_right
+      }
+      quadrants[[x < WIDTH / 2, y < HEIGHT / 2]]
     end
   end
 
   def part1
-    final_positions = simulate(parse_robots, 100)
-    calculate_safety_factor(count_robots_in_quadrants(final_positions))
+    robots_at_step(100)
+      .then { count_robots_in_quadrants(_1) }
+      .then { calculate_safety_factor(_1) }
   end
 
   def part2(visualize = false)
-    robots = parse_robots
-    (1..).each do |step|
-      robots = robots.map(&:move)
-      if find_horizontal_line(robots)
-        puts visualize(robots) if visualize
-        return step
-      end
+    (1..).find do |step|
+      robots = robots_at_step(step)
+      find_horizontal_line(robots).tap { puts visualize(robots) if visualize && _1 }
     end
   end
 
   def visualize(robots)
     grid = Array.new(HEIGHT) { Array.new(WIDTH, ".") }
-    robots.each { |r| grid[r.y][r.x] = "#" }
+    robots.each { grid[_1.y][_1.x] = "#" }
     grid.map(&:join).join("\n")
   end
 
   private
 
-  def parse_robots
-    input_lines.map do |line|
-      Robot.new(*line.scan(/-?\d+/).map(&:to_i))
+  def parsed_robots = input_lines.map { Robot.new(*_1.scan(/-?\d+/).map(&:to_i)) }
+  memoize :parsed_robots
+
+  def robots_at_step(step) = parsed_robots.map { _1.at_step(step) }
+
+  def count_robots_in_quadrants(robots)
+    robots.map(&:quadrant).tally.tap do |counts|
+      %i[top_left top_right bottom_left bottom_right].each { counts[_1] ||= 0 }
     end
   end
 
-  def simulate(robots, steps)
-    steps.times.reduce(robots) { |rs, _| rs.map(&:move) }
-  end
+  def calculate_safety_factor(quadrant_counts) = quadrant_counts.values.reduce(:*)
 
-  def count_robots_in_quadrants(robots)
-    counts = robots.group_by(&:quadrant).transform_values(&:count)
-    %i[top_left top_right bottom_left bottom_right].to_h { |q| [q, counts[q] || 0] }
-  end
-
-  def calculate_safety_factor(quadrant_counts)
-    quadrant_counts.values.reduce(:*)
-  end
-
-  def find_horizontal_line(robots)
+  def find_horizontal_line(robots, line_length = 10)
     robots.group_by(&:y).any? do |_, robots_at_y|
-      robots_at_y.map(&:x).sort!.each_cons(10).any? do |window|
-        window.first + 9 == window.last && window.size == 10
-      end
+      robots_at_y.map(&:x).sort!
+        .each_cons(line_length)
+        .any? { |x1, *_, x_line_length| x1 + line_length - 1 == x_line_length }
     end
   end
 end
