@@ -1,0 +1,203 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "json"
+require "terminal-table"
+require "pastel"
+require "optparse"
+require "io/console"
+require "net/http"
+require "uri"
+require "fileutils"
+
+class AoCLeaderboard
+  CACHE_DIR = File.join(ENV["HOME"], ".cache", "aoc-leaderboard")
+  CACHE_DURATION = 900 # 15 minutes
+
+  def initialize(show_times: false, show_ranks: false)
+    @pastel = Pastel.new
+    @show_times = show_times
+    @show_ranks = show_ranks
+    @terminal_width = begin
+      IO.console.winsize[1]
+    rescue
+      80
+    end
+  end
+
+  def self.fetch_leaderboard
+    return unless ENV["AOC_LEADERBOARD"] && ENV["AOC_SESSION"]
+
+    cache_file = File.join(CACHE_DIR, "leaderboard.json")
+    FileUtils.mkdir_p(CACHE_DIR)
+
+    if File.exist?(cache_file) && (cache_age = Time.now - File.mtime(cache_file)) < CACHE_DURATION
+      puts "Using cached data (#{(CACHE_DURATION - cache_age).round} seconds until refresh)"
+      return File.read(cache_file)
+    end
+
+    puts "Fetching leaderboard from Advent of Code..."
+    uri = URI(ENV["AOC_LEADERBOARD"])
+    response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) do |http|
+      http.get(uri, "Cookie" => "session=#{ENV["AOC_SESSION"]}")
+    end
+
+    return puts "Failed to fetch leaderboard: #{response.code} #{response.message}" unless response.is_a?(Net::HTTPSuccess)
+
+    puts "Successfully fetched new data"
+    File.write(cache_file, response.body)
+    response.body
+  end
+
+  def display_leaderboard(data)
+    return puts @pastel.red("No data available") unless data&.dig("members")&.any?
+
+    members = data["members"].values
+    active_members = members.select { |m| m.dig("completion_day_level")&.any? }
+    @event_year = data["event"]
+    @total_participants = members.size
+    @points_cache = calculate_points(members)
+    @max_day = active_members.flat_map { |m| m["completion_day_level"].keys.map(&:to_i) }.max || 0
+
+    display_table(active_members.sort_by { |m| [-m["local_score"], m["last_star_ts"]] })
+  end
+
+  private
+
+  def calculate_points(members)
+    (1..25).to_h do |day|
+      day_str = day.to_s
+      points = {}
+      ranks = {}
+
+      %w[1 2].each do |part|
+        completions = members
+          .filter_map { |m| [m["id"], m.dig("completion_day_level", day_str, part, "get_star_ts")] }
+          .sort_by { |_, time| time || Float::INFINITY }
+
+        points[part] = {}
+        ranks[part] = {}
+        completions.each_with_index do |(id, _), i|
+          points[part][id] = @total_participants - i
+          ranks[part][id] = i + 1
+        end
+      end
+
+      [day_str, {points:, ranks:}]
+    end
+  end
+
+  def display_table(members)
+    headings = [@pastel.cyan("Rank"), @pastel.cyan("Name"), @pastel.cyan("Score")]
+    headings.concat((1..@max_day).map { |d| @pastel.cyan(d.to_s) })
+
+    display_type = if @show_times
+      @show_ranks ? "Times(Rank)" : "Times"
+    else
+      (@show_ranks ? "Points(Rank)" : "Points")
+    end
+
+    table = Terminal::Table.new(
+      style: {border: :unicode_round, padding_left: 0, padding_right: 0, alignment: :center},
+      title: @pastel.bright_blue("Advent of Code #{@event_year} Leaderboard - #{display_type}"),
+      headings:
+    )
+
+    members.each_with_index do |member, index|
+      name = member["name"] || "Anonymous ##{member["id"]}"
+      table.add_row([index + 1, name, member["local_score"], *build_row(member, "1")])
+      table.add_row(["", "", "", *build_row(member, "2")])
+      table.add_separator unless index == members.size - 1
+    end
+
+    (0..@max_day + 2).each do |i|
+      table.align_column(i, :right) unless i == 1
+    end
+
+    puts "\n#{table}\n#{completion_legend}"
+  end
+
+  def build_row(member, part)
+    (1..@max_day).map do |day|
+      time = member.dig("completion_day_level", day.to_s, part, "get_star_ts")
+      next @pastel.bright_black("·") unless time
+
+      color = (part == "1") ? :white : :bright_yellow
+      cache = @points_cache[day.to_s]
+
+      if @show_times
+        time_str = format_time(time, day)
+        @show_ranks ? @pastel.send(color, "#{time_str}(#{cache[:ranks][part][member["id"]]})")
+                   : @pastel.send(color, time_str)
+      else
+        points = cache[:points][part][member["id"]] || 0
+        @show_ranks ? @pastel.send(color, "#{points}(#{cache[:ranks][part][member["id"]]})")
+                   : @pastel.send(color, points.to_s)
+      end
+    end
+  end
+
+  def format_time(timestamp, day)
+    unlock_time = Time.new(@event_year, 12, day, 0, 0, 0, "-05:00").to_i
+    delta = timestamp - unlock_time
+    days, remainder = delta.divmod(24 * 3600)
+    hours, remainder = remainder.divmod(3600)
+    minutes, seconds = remainder.divmod(60)
+
+    if days.positive?
+      "#{days}d#{hours.to_s.rjust(2, "0")}"
+    elsif hours.positive?
+      "#{hours}h#{minutes.to_s.rjust(2, "0")}"
+    else
+      "#{minutes}m#{seconds.to_s.rjust(2, "0")}"
+    end
+  end
+
+  def completion_legend
+    type = if @show_times
+      @show_ranks ? "time(rank)" : "time"
+    else
+      (@show_ranks ? "points(rank)" : "points")
+    end
+    part1 = @show_times ? "1h23" : "100"
+    part2 = @show_times ? "4h56" : "50"
+
+    [
+      "Part 1: ", @pastel.white(@show_ranks ? "#{part1}(1)" : part1),
+      @pastel.white(" = completion #{type}  "),
+      "Part 2: ", @pastel.bright_yellow(@show_ranks ? "#{part2}(2)" : part2),
+      @pastel.white(" = completion #{type}  "),
+      @pastel.bright_black("·"),
+      @pastel.white(" = not started")
+    ].join
+  end
+end
+
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: #{$PROGRAM_NAME} [options] [json_file]"
+  opts.on("-t", "--time", "Show completion times instead of points") { options[:show_times] = true }
+  opts.on("-r", "--rank", "Show ranks alongside times or points") { options[:show_ranks] = true }
+end.parse!
+
+json_data = if ARGV[0]
+  puts "Loading data from #{ARGV[0]}..."
+  begin
+    File.read(ARGV[0])
+  rescue
+    nil
+  end
+else
+  AoCLeaderboard.fetch_leaderboard
+end
+
+if json_data
+  AoCLeaderboard.new(
+    show_times: options[:show_times],
+    show_ranks: options[:show_ranks]
+  ).display_leaderboard(JSON.parse(json_data))
+else
+  puts "Usage: #{$PROGRAM_NAME} [--time] [--rank] [json_file]"
+  puts "  Or set AOC_LEADERBOARD and AOC_SESSION environment variables"
+  exit 1
+end
