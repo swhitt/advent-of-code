@@ -22,13 +22,6 @@ class AoC::Year2024::Solution18 < Base
     end.then { "#{_1[0]},#{_1[1]}" }
   end
 
-  def simulate_byte_falls_first_kilobyte
-    input.lines
-      .map { _1.split(",").map(&:to_i) }
-      .first(1024)
-      .each { @grid[_2][_1] = "#" }
-  end
-
   private
 
   def initialize_grid
