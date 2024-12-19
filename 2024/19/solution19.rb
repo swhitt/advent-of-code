@@ -4,46 +4,50 @@ require_relative "../../lib/base"
 # https://adventofcode.com/2024/day/19
 class AoC::Year2024::Solution19 < Base
   def part1
-    patterns, designs = input.split("\n\n")
-    available = patterns.split(", ").map(&:strip)
-    designs.strip.split("\n").count { |design| can_make?(design, available) }
-  end
-
-  def can_make?(design, patterns)
-    dp = Array.new(design.length + 1) { |i| i == design.length }
-
-    (design.length - 1).downto(0) do |i|
-      dp[i] = patterns.any? do |pat|
-        design[i, pat.length] == pat && dp[i + pat.length]
-      end
+    parse_input.then do |patterns, designs|
+      designs.count { can_make?(_1, patterns) }
     end
-
-    dp[0]
   end
 
   def part2
-    patterns, designs = input.split("\n\n")
-    available = patterns.split(", ").map(&:strip)
-    designs_to_check = designs.strip.split("\n")
-
-    designs_to_check.sum { |design| count_ways(design, available) }
+    parse_input.then do |patterns, designs|
+      designs.sum { count_ways(_1, patterns) }
+    end
   end
 
-  def count_ways(design, patterns)
-    n = design.length
-    dp = Array.new(n + 1, 0)
-    dp[n] = 1
+  private
 
-    # Work backwards from the end
-    (n - 1).downto(0) do |i|
-      patterns.each do |pattern|
-        if pattern.length <= design.length - i &&
-            design[i...(i + pattern.length)] == pattern
-          dp[i] += dp[i + pattern.length]
-        end
+  def parse_input
+    patterns, designs = input.split("\n\n")
+    [
+      patterns.split(", ").map(&:strip),
+      designs.lines(chomp: true)
+    ]
+  end
+
+  def can_make?(design, patterns)
+    dp = Array.new(design.length + 1) { _1 == design.length }
+
+    (design.length - 1).downto(0) do |i|
+      dp[i] = patterns.any? do |pattern|
+        design[i, pattern.length] == pattern && dp[i + pattern.length]
       end
     end
 
-    dp[0]
+    dp.first
+  end
+
+  def count_ways(design, patterns)
+    dp = Array.new(design.length + 1, 0)
+    dp[-1] = 1
+
+    (design.length - 1).downto(0) do |i|
+      dp[i] = patterns.sum do |pattern|
+        next 0 if pattern.length > design.length - i
+        (design[i...(i + pattern.length)] == pattern) ? dp[i + pattern.length] : 0
+      end
+    end
+
+    dp.first
   end
 end
