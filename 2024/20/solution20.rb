@@ -31,7 +31,7 @@ class AoC::Year2024::Solution20 < Base
 
   def find_path(grid, start)
     dirs = [[-1, 0], [0, 1], [1, 0], [0, -1]]
-    seen = Set[start.to_s]
+    seen = Set[start]
     queue = [start]
     prevs = {}
 
@@ -40,12 +40,11 @@ class AoC::Year2024::Solution20 < Base
 
       dirs.each do |dr, dc|
         other = [curr[0] + dr, curr[1] + dc]
-        other_key = other.to_s
-        next if seen.include?(other_key) || !valid_move?(grid, other)
+        next if seen.include?(other) || !valid_move?(grid, other)
 
         queue << other
-        prevs[other_key] = curr
-        seen << other_key
+        prevs[other] = curr
+        seen << other
       end
     end
 
@@ -60,7 +59,7 @@ class AoC::Year2024::Solution20 < Base
     path = []
     while curr
       path << curr
-      curr = prevs[curr.to_s]
+      curr = prevs[curr]
     end
     path.reverse
   end
