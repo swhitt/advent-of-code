@@ -4,18 +4,13 @@ require_relative "../../lib/base"
 # https://adventofcode.com/2024/day/23
 class AoC::Year2024::Solution23 < Base
   def part1
-    triples = Set.new
-
-    connections.each_key do |node|
-      connections[node].each do |mid|
-        others = connections[node] - [mid]
-        next unless others.any? { connections[mid].include?(_1) }
-
-        others.each do |last|
-          triples << [node, mid, last].sort if connections[mid].include?(last)
+    triples = connections.keys.flat_map do |node|
+      connections[node].flat_map do |mid|
+        (connections[node] & connections[mid]).map do |last|
+          [node, mid, last].sort
         end
       end
-    end
+    end.uniq
 
     triples.count { |triple| triple.any? { _1.start_with?("t") } }
   end
@@ -31,7 +26,7 @@ class AoC::Year2024::Solution23 < Base
   private
 
   def connections
-    @connections ||= input_lines.each_with_object(Hash.new { |h, k| h[k] = [] }) do |line, conn|
+    @connections ||= input_lines.each_with_object(Hash.new { |h, k| h[k] = Set.new }) do |line, conn|
       a, b = line.split("-")
       conn[a] << b
       conn[b] << a
