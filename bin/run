@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "optparse"
+require "bundler/setup"
+
+options = { debug: false, part: nil }
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: bin/run YEAR DAY [options]"
+  opts.on("-p", "--part PART", "Run only part 1 or 2") { |v| options[:part] = v }
+  opts.on("--repl", "Drop into REPL after run (sets AOC_DEBUG=true)") { options[:debug] = true }
+  opts.on("-h", "--help", "Show this help") { puts opts; exit }
+end
+parser.parse!
+
+year = ARGV.shift
+day = ARGV.shift
+
+abort "YEAR and DAY are required (e.g. bin/run 2025 01)" unless year && day
+
+day_str = format("%02d", day.to_i)
+year_str = format("%04d", year.to_i)
+
+solution_path = File.join(year_str, day_str, "solution#{day_str}.rb")
+abort "Solution file not found: #{solution_path}" unless File.exist?(solution_path)
+
+require_relative "../#{solution_path}"
+
+solution_class = AoC.const_get("Year#{year_str}").const_get("Solution#{day_str}")
+
+ENV["AOC_DEBUG"] = options[:debug] ? "true" : "false"
+
+solution_class.new.run(part: options[:part], debug: ENV["AOC_DEBUG"] != "false")

@@ -1,0 +1,65 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "optparse"
+require "tzinfo"
+
+options = {
+  skip_spec: ENV.fetch("AOC_SKIP_SPEC", "0") == "1",
+  offline: ENV.fetch("AOC_OFFLINE", "0") == "1",
+  wait: false
+}
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: bin/newday [options]"
+
+  opts.on("-y", "--year YEAR", Integer, "Year (default: current ET year)") { |v| options[:year] = v }
+  opts.on("-d", "--day DAY", Integer, "Day (default: current ET day or 1 if not December)") { |v| options[:day] = v }
+  opts.on("--skip-spec", "Skip generating spec (default follows AOC_SKIP_SPEC env)") { options[:skip_spec] = true }
+  opts.on("--with-spec", "Force generating spec") { options[:skip_spec] = false }
+  opts.on("--offline", "Do not attempt to download input") { options[:offline] = true }
+  opts.on("-w", "--wait", "Wait until unlock (ET midnight) before running setup") { options[:wait] = true }
+  opts.on("-h", "--help", "Show this help") { puts opts; exit }
+end
+parser.parse!
+
+tz = TZInfo::Timezone.get("America/New_York")
+now = tz.now
+default_day =
+  if options[:wait]
+    if now.month == 12
+      [now.day + 1, 25].min
+    else
+      1
+    end
+  else
+    now.month == 12 ? now.day : 1
+  end
+
+year = (options[:year] || now.year).to_i
+day = (options[:day] || default_day).to_i
+day_str = format("%02d", day)
+year_str = format("%04d", year)
+
+if options[:wait]
+  target = tz.local_time(year, 12, day).to_time
+  if now >= target
+    puts "Day #{day}, #{year} is already unlocked. Running setup now..."
+  else
+    wait_seconds = (target - now).ceil
+    puts "Waiting for Day #{day}, #{year} to unlock at #{target} (#{wait_seconds} seconds)..."
+    sleep(wait_seconds) if wait_seconds.positive?
+  end
+end
+
+env = {}
+env["AOC_SKIP_SPEC"] = options[:skip_spec] ? "1" : "0"
+env["AOC_OFFLINE"] = "1" if options[:offline]
+
+cmd = ["bundle", "exec", "rake", "aoc:setup[#{year},#{day}]"]
+puts ">> Running: #{cmd.join(" ")} (AOC_SKIP_SPEC=#{env['AOC_SKIP_SPEC']})"
+success = system(env, *cmd)
+exit($?.exitstatus || 1) unless success
+
+solution_path = File.join(year_str, day_str, "solution#{day_str}.rb")
+puts "Ready: #{solution_path}"

@@ -1,0 +1,14 @@
+# Advent of Code environment
+# Copy to .envrc and run `direnv allow` (or source manually)
+
+export AOC_SESSION="<your_session_cookie>"
+export AOC_OFFLINE=0
+export AOC_INPUT_DIR="$PWD"
+export AOC_DEBUG=true
+export AOC_AUTORUN=true
+export AOC_REPL_MODE="binding"
+export AOC_SKIP_SPEC=0
+export TZ="America/New_York"
+
+# Ruby version manager hooks (adjust for your setup)
+# layout ruby  # direnv + chruby/rbenv/asdf

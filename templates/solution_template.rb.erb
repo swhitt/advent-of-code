@@ -3,11 +3,15 @@ require_relative "../../lib/base"
 # Solution for the <%= year %> day <%= day %> puzzle
 # https://adventofcode.com/<%= year %>/day/<%= day %>
 class AoC::Year<%= year%>::Solution<%= padded_day %> < Base
+  def parsed_input
+    @parsed_input ||= input_lines
+  end
+
   def part1
-    # do it first
+    # use parsed_input here
   end
 
   def part2
-    # do it second
+    # build on part1 or parsed_input
   end
 end

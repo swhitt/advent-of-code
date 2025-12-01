@@ -35,6 +35,8 @@ class Base
     private
 
     def run_at_exit?
+      return false if ENV.fetch("AOC_AUTORUN", "true") == "false"
+
       File.expand_path($PROGRAM_NAME) == File.expand_path($0) && !defined?(RSpec)
     end
   end
@@ -45,11 +47,11 @@ class Base
     @input = input || load_input(input_filename)
   end
 
-  def part1(input)
+  def part1
     raise NotImplementedError, "Please implement part1"
   end
 
-  def part2(input)
+  def part2
     raise NotImplementedError, "Please implement part2"
   end
 
@@ -57,13 +59,17 @@ class Base
 
   def input_nums = input_lines.map { _1.split.map(&:to_i) }
 
-  def run(debug = true)
-    results = benchmark_parts
+  def run(part: nil, debug: default_debug?)
+    results = benchmark_parts(part: part)
     display_results(results)
-    binding.pry if debug # rubocop:disable Lint/Debugger
+    start_repl if debug # rubocop:disable Lint/Debugger
   end
 
   private
+
+  def default_debug?
+    ENV.fetch("AOC_DEBUG", "true") != "false"
+  end
 
   def load_input(filename)
     input_path = File.join(self.class.solution_path, filename)
@@ -78,11 +84,19 @@ class Base
     []
   end
 
-  def benchmark_parts
-    {
-      part1: Benchmark.measure { execute_and_rescue(:part1) },
-      part2: Benchmark.measure { execute_and_rescue(:part2) }
-    }
+  def benchmark_parts(part: nil)
+    parts = case part
+    when nil then [:part1, :part2]
+    when :part1, "part1", 1, "1" then [:part1]
+    when :part2, "part2", 2, "2" then [:part2]
+    else
+      warn "Unknown part #{part.inspect}, running both parts."
+      [:part1, :part2]
+    end
+
+    parts.to_h do |p|
+      [p, Benchmark.measure { execute_and_rescue(p) }]
+    end
   end
 
   def display_results(results)
@@ -99,6 +113,17 @@ class Base
     puts "#{method_name.to_s.capitalize} failed: #{e.class} - #{e.message}"
     puts "Backtrace:\n\t#{e.backtrace.join("\n\t")}"
     nil
+  end
+
+  def start_repl
+    return unless defined?(Pry)
+
+    case ENV.fetch("AOC_REPL_MODE", "binding")
+    when "object"
+      Pry.start(self)
+    else
+      binding.pry # rubocop:disable Lint/Debugger
+    end
   end
 
   def format_duration(seconds)

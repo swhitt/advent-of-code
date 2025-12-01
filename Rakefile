@@ -7,6 +7,7 @@ namespace :aoc do
   task :setup, [:year, :day] do |_t, args|
     day = args[:day].to_i
     year = args[:year] || Time.now.year
+    skip_spec = ENV.fetch("AOC_SKIP_SPEC", "0") == "1"
     day_str = day.to_s.rjust(2, "0")
     year_str = year.to_s.rjust(4, "0")
     dir_path = File.join(year_str, day_str)
@@ -30,16 +31,20 @@ namespace :aoc do
       puts "Created solution file: #{solution_path}"
     end
 
-    spec_dir = File.join("spec", dir_path)
-    spec_path = File.join(spec_dir, "solution#{day_str}_spec.rb")
-    if File.exist?(spec_path)
-      puts "Spec file already exists: #{spec_path}"
+    unless skip_spec
+      spec_dir = File.join("spec", dir_path)
+      spec_path = File.join(spec_dir, "solution#{day_str}_spec.rb")
+      if File.exist?(spec_path)
+        puts "Spec file already exists: #{spec_path}"
+      else
+        FileUtils.mkdir_p(spec_dir)
+        template_path = File.join("templates", "solution_spec.rb.erb")
+        template = ERB.new(File.read(template_path), trim_mode: "-")
+        File.write(spec_path, template.result(binding))
+        puts "Created spec file: #{spec_path}"
+      end
     else
-      FileUtils.mkdir_p(spec_dir)
-      template_path = File.join("templates", "solution_spec.rb.erb")
-      template = ERB.new(File.read(template_path), trim_mode: "-")
-      File.write(spec_path, template.result(binding))
-      puts "Created spec file: #{spec_path}"
+      puts "Skipping spec generation (AOC_SKIP_SPEC=1)."
     end
     AoC::InputManager.input_for(day, year)
   end
